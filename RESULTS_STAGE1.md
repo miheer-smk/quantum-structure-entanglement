@@ -1,7 +1,12 @@
 # RESULTS_STAGE1.md — Stage 1 (in progress)
 
 **Status:** pre-Stage-1 audits complete (§1, §2). Toy-case validation not yet run.
-**Tests: 29 passed.** Submodule pin `0c4e6e4` asserted; all 35 pinned artifact hashes verified.
+**Tests: 37 passed** (219 s with `OMP_NUM_THREADS=4`). Submodule pin `0c4e6e4` asserted;
+all 35 pinned artifact hashes verified.
+
+> Runbook note: the suite does dense `eigvalsh` at L = 12 (4096×4096). Unbounded BLAS threads
+> plus any concurrent run drives load average past 50 on a 20-core box and the suite appears
+> to hang. Run it with `OMP_NUM_THREADS=4`, and never concurrently with itself.
 
 ---
 
