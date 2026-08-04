@@ -1,0 +1,42 @@
+# Machine-local configuration — never commit
+.env.local
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+dist/
+build/
+
+# Artifacts are referenced by hash under $QSAE_ARTIFACTS, never vendored here
+*.pt
+*.npz
+*.npy
+*.pkl
+*.h5
+*.ckpt
+*.pth
+
+# Raw run outputs (committed summaries live in results/)
+runs/
+logs/
+
+# Generated figures are committed; their intermediates are not
+figures/**/*.tmp
+
+# Jupyter
+.ipynb_checkpoints/
+notebooks/scratch/
+
+# Secrets
+*.pem
+*_token.txt
+
+# OS
+.DS_Store
+Thumbs.db
