@@ -1,0 +1,3 @@
+[submodule "submodules/quantum-structure-sae"]
+	path = submodules/quantum-structure-sae
+	url = git@github.com:miheer-smk/quantum-structure-sae.git
