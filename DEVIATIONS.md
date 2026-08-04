@@ -137,3 +137,39 @@ the pin reflects what was published.
 generic "HPC cluster" in all committed text, including inside the archived copy of the brief,
 because the cluster name narrows the institution. Machine specifics live in gitignored local
 config. This is the one place the archived brief departs from the author's verbatim text.
+
+## 2026-08-04 — Stage 0: site-ordering convention fixed explicitly
+
+**Finding.** `qsae.observables._reduce_density_matrix` computes `state.reshape(dim_A, dim_B)`,
+making subsystem A the **high** bits, i.e. sites `[n - n_A, n)`; its docstring says
+"qubits 0..n_A-1 (left block)". The predecessor's Hamiltonian uses `bit i = site i`, so site 0
+is the **low** bit. The two are reflections of each other.
+
+**Impact on published results: none** — all inherited results use the half cut, where
+`S(left) = S(right)` exactly for a pure state. Not harmless for this arm, which needs the full
+profile on asymmetric disordered chains: the free-fermion profile matched ED *reversed* to
+4.86e-12 while differing unreversed by 4.2e-01.
+
+**Resolution.** This arm fixes `site j <-> bit j`, block A = sites `[0, cut)`, in
+`qsent/exact.py`, and does not use the inherited entropy function for profiles. The inherited
+function is left untouched in the pinned submodule.
+
+## 2026-08-04 — Stage 0: hook family is 7 points, not 8
+
+**Deviation.** The plan proposed 8 hook points including `post_final_norm`. That tensor has
+passed through `final_norm` and is a different normalisation from the published hook
+(measured difference 2.39 vs the published tensor). Including it would place unlike tensors on
+the same layer axis that H4's rank correlation runs along. The family is therefore **7**
+post-residual-add, pre-`final_norm` points; `post_final_norm` remains extractable but is
+excluded from the layer axis. `k=6` is verified identical to
+`qsae.analysis.extract.last_layer_pooled` to 8.94e-07 (float32 machine precision).
+
+## 2026-08-04 — Stage 0: provenance test added after a fabrication caught in draft
+
+**Recorded because it is the kind of error that must not be quiet.** The first draft of
+`tests/test_exact_entropy.py` inlined four of five "spanning realizations" as
+plausible-looking numbers rather than the actual pinned vectors. Every physics assertion
+still passed, because the ED/free-fermion gate holds for any `h`; the `delta_r` labels would
+have been false while the suite stayed green. Caught by an out-of-band provenance comparison
+against the pinned ensemble. `test_spanning_realizations_match_pinned_ensemble` and
+`test_spanning_realizations_actually_span` are now permanent parts of the gate.
