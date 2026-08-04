@@ -30,7 +30,8 @@ sketched only where a Stage 0/1 design decision forecloses them.
 
 ## 0. Inventory findings (Brief Part 2 deliverable, done first because everything branches on it)
 
-Read from `/home/iiitn/Downloads/quantum-structure-sae-main` at `HEAD = 0c4e6e4`.
+Read from the `quantum-structure-sae` working tree at `HEAD = 0c4e6e4` (now pinned as
+`submodules/quantum-structure-sae`; machine-local paths live in the gitignored `.env.local`).
 
 ### 0.1 The model
 
