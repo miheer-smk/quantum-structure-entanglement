@@ -192,3 +192,25 @@ for any `h`), a regex returning the partial-correlation `0.560` in place of the
 incremental-R² `0.0283`, and a mirrored entropy profile (invisible to the `c_eff` fit, which
 returns identical `c_eff` and identical residuals under `l -> L-l`). `CLAUDE.md` now requires
 every validation check to be demonstrated capable of failing on the error it targets.
+
+## 2026-08-04 — c_eff demoted further: no universality-class claim at L <= 12
+
+**Deviation.** The brief's H2 pre-registers `c_eff` against an acceptance interval. Measured
+finite-size bias at the actual system sizes makes that untestable: on the disordered critical
+sub-ensemble the bias is +0.176 to +0.209 (disorder-averaged) and +0.256 to +0.301 (typical),
+against a clean-vs-IRFP gap of only 0.153. Even-odd oscillation terms remove none of it, and
+the observed clean-vs-disordered separation (+0.046, +0.029, +0.058 at L = 8, 10, 12) is
+non-monotonic, so nothing can be extrapolated.
+
+**Bias-corrected estimator considered and rejected**: the correction exceeds the effect,
+differs between the clean and disordered universality classes, and is non-monotonic in L.
+Applying it would amount to fitting the answer.
+
+**Pre-registered instead:** `c_eff` is reported descriptively with a bootstrap CI plus the
+measured bias table, and **no universality-class identification is claimed from it** at these
+sizes. H2's PRIMARY (paired per-realization `S_model` vs `S_exact`) is unaffected — it uses no
+`c_eff` fit — and the write-up must say so adjacent to the caveat.
+
+**Reference data note.** L = 10 and L = 12 disordered chains used for this measurement were
+generated reference-only under a documented separate RNG. They are explicitly NOT a pinned
+ensemble and are never used for any model claim; only L = 8 has a pinned ensemble.

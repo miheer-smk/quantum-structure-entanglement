@@ -1,7 +1,7 @@
-# RESULTS_STAGE1.md — Stage 1 (in progress)
+# RESULTS_STAGE1.md — Stage 1
 
-**Status:** pre-Stage-1 audits complete (§1, §2). Toy-case validation not yet run.
-**Tests: 37 passed** (219 s with `OMP_NUM_THREADS=4`). Submodule pin `0c4e6e4` asserted;
+**Gate: PASS.** All toy cases within 1e-10; orientation gate green; splits asserted.
+**Tests: 57 passed** (219 s with `OMP_NUM_THREADS=4`). Submodule pin `0c4e6e4` asserted;
 all 35 pinned artifact hashes verified.
 
 > Runbook note: the suite does dense `eigvalsh` at L = 12 (4096×4096). Unbounded BLAS threads
@@ -207,7 +207,80 @@ per provider, not pairwise between them.
 through the same assertions and confirms rejection (forward error 0.57 > 0.1 threshold;
 reversed error < 1e-10). Per the standing rule now in `CLAUDE.md`.
 
-## 4. Still to run in Stage 1
+## 4. Toy-case validation — all within 1e-10
+
+| Case | Expected | Result |
+|---|---|---|
+| Product `\|0…0⟩`, `\|+…+⟩`, L = 4/6/8 | `S(ℓ) = 0` ∀ℓ | ✅ |
+| Bell(0,1) ⊗ product, L = 4 | `ln 2` at cut 1, `0` at cuts 2,3 | ✅ |
+| GHZ, L = 4/6/8 | `ln 2` at every internal cut | ✅ |
+| W state, L = 4/6/8 | `H₂(ℓ/L)` closed form | ✅ |
+| Maximally mixed half, L = 6 | `(L/2) ln 2` ceiling | ✅ |
+| TFIM (all 5 spanning realizations) | matches Stage 0 golden | ✅ |
+
+**Untruncated spectrum:** full `2^cut` density matrix at every cut, trace 1 to 1e-12. At
+L ≤ 16 the max cut dimension is 256, so no truncation is ever needed — the bond-dimension
+trap is structurally avoided rather than merely reported.
+
+## 5. Construction B — pipeline validated before any model touches it
+
+| Check | Expected | Result |
+|---|---|---|
+| Perfect readout (exact `ψ_h`) | returns `S_exact` | ✅ < 1e-10 |
+| Perfect readout × arbitrary scale (−3.7) | unchanged (L2 normalisation) | ✅ < 1e-10 |
+| Rank-1 (product) decoded state | `S = 0` at every cut | ✅ < 1e-10 |
+| Schmidt-rank bound `min(feature_dim, 2^min(ℓ,L−ℓ))` | non-binding at L=8,12; binding at L=16 | ✅ flagged |
+
+This separates "the pipeline is wrong" from "the model doesn't encode it" — the failure mode
+that would otherwise waste the most time in Stage 2. `entropy_profile_decoded` will register
+in `PROFILE_PROVIDERS` and inherit the orientation gate automatically.
+
+## 6. Split disjointness
+
+`qsent/splits.py`, with both notions asserted separately because per-site disorder makes them
+genuinely different:
+
+| Check | Result |
+|---|---|
+| Realization-disjoint catches a shared row | ✅ raises |
+| Field-value-disjoint catches a shared scalar | ✅ raises |
+| **Realization-disjoint does NOT imply field-value-disjoint** | ✅ demonstrated |
+| δ-stratified split: disjoint, complete, δ_r-balanced (mean/sd within 0.05) | ✅ |
+
+The third row is the substantive one: a new realization vector can reuse every individual
+`h_i` from the fit set. A shuffle-based split would pass a naive check and still leak.
+Stratification is required because an unstratified split leaves the two sides with different
+δ_r distributions, confounding any δ-dependent claim with a split artifact.
+
+## 7. Estimator-bias harness
+
+Plug-in entropy is confirmed biased **downward** at finite sample count, and Miller–Madow
+reduces (never reverses) that bias, at N = 64 and N = 256 on a known uniform 16-state
+distribution. Characterised before anything relies on a corrected estimate.
+
+## 8. `c_eff` finite-size bias — measured, decision pre-registered
+
+Full tables and the pre-registered decision are in `PLAN.md` §A0. Summary:
+
+- **Clean critical chain** (true `c = 0.5`): bias **+0.088 / +0.085 / +0.081** at L = 8/10/12.
+- **Disordered critical sub-ensemble** (target `ln2/2 = 0.347`): bias **+0.195 / +0.209 /
+  +0.176** disorder-averaged, **+0.295 / +0.301 / +0.256** typical.
+- Even-odd oscillations explain **none** of it (parity term moves `c_eff` by ≤ 0.0065;
+  even-ℓ restriction is erratic and non-monotonic).
+- Clean-vs-disordered separation actually observed: **+0.046 / +0.029 / +0.058** against an
+  asymptotic gap of 0.153 — 3–5× too small and **non-monotonic in L**.
+
+**The disordered bias exceeds the entire gap it would have to resolve.** Pre-registered
+conclusion: at these L the `c_eff` fit **cannot distinguish clean Ising from the IRFP**, and
+no universality-class claim is made from it. A bias-corrected estimator was considered and
+**rejected** — the correction is larger than the effect, differs between universality classes,
+and is non-monotonic in L, so applying it would amount to fitting the answer.
+
+**This does not affect the H2 primary.** The paired per-realization comparison of
+`S_model(ℓ; r)` against `S_exact(ℓ; r)` uses no `c_eff` fit, no scaling form, and no asymptotic
+target. The bias above is a limitation of a secondary descriptive only.
+
+## 9. Still to run
 
 Toy closed-form cases (product → 0; Bell → ln 2; GHZ → ln 2 at every internal cut;
 W → `H₂(ℓ/L)`; TFIM L=8 vs Stage 0 golden values), the untruncated-spectrum assertion, the

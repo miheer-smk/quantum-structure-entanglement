@@ -403,6 +403,82 @@ this arm.**
 reproduction result. This section holds the text that must be lifted into it verbatim, so the
 wording is fixed now rather than written after the numbers are seen.
 
+### A0 — `c_eff` finite-size bias at L = 8/10/12: MEASURED, and the decision taken in advance
+
+Measured, not extrapolated, before any model number exists. Ground truth throughout is the
+free-fermion solver (validated against ED to < 1e-10 at these L).
+
+**Clean critical open chain, where the true answer is `c = 0.5` by construction:**
+
+| L | plain fit | bias | + parity term | + decaying parity | even-ℓ only |
+|---|---|---|---|---|---|
+| **8** | 0.5881 | **+0.0881** | 0.5870 | 0.5861 | 0.5718 |
+| **10** | 0.5845 | **+0.0845** | 0.5836 | 0.5825 | 0.5691 |
+| **12** | 0.5809 | **+0.0809** | 0.5801 | 0.5789 | 0.5662 |
+| 32 | 0.5570 | +0.0570 | 0.5568 | 0.5557 | 0.5468 |
+| 128 | 0.5289 | +0.0289 | 0.5289 | 0.5283 | 0.5240 |
+
+**Disordered critical sub-ensemble `|δ_r| < 0.05`, asymptotic target `ln2/2 = 0.34657`:**
+
+| L | N | source | disorder-avg `[S]` fit | bias | typical (median) fit | bias |
+|---|---|---|---|---|---|---|
+| **8** | 1877 | pinned seed-1 | 0.5419 | **+0.1953** | 0.6420 | **+0.2954** |
+| **10** | 2000 | reference RNG | 0.5557 | **+0.2091** | 0.6479 | **+0.3013** |
+| **12** | 2000 | reference RNG | 0.5229 | **+0.1763** | 0.6025 | **+0.2559** |
+
+*(L = 10/12 disordered chains are generated reference-only for this measurement — a
+documented separate RNG, explicitly **not** a pinned ensemble and never used for any model
+claim. Only L = 8 has a pinned ensemble.)*
+
+**Even-odd oscillations do not explain the bias.** Adding a parity term moves clean-chain
+`c_eff` by ≤ 0.0011 and the disordered fit by ≤ 0.0065. Restricting to even ℓ changes it
+erratically and non-monotonically (disordered: 0.4818, 0.5550, 0.4991 at L = 8, 10, 12).
+Neither correction removes it. This is a genuine finite-size correction, not an oscillation
+artifact.
+
+**The separation the H2 secondary would have to resolve:**
+
+| L | clean `c_eff` | disordered `c_eff` | observed gap | asymptotic gap |
+|---|---|---|---|---|
+| 8 | 0.5881 | 0.5419 | **+0.0463** | 0.15343 |
+| 10 | 0.5845 | 0.5557 | **+0.0288** | 0.15343 |
+| 12 | 0.5809 | 0.5229 | **+0.0580** | 0.15343 |
+
+#### DECISION, pre-registered now
+
+The disordered bias (**+0.176 to +0.209**, and **+0.256 to +0.301** for the typical profile)
+is **larger than the entire 0.15343 gap** that separates clean Ising from the IRFP. The
+surviving clean-vs-disordered separation is 3–5× smaller than asymptotic and **non-monotonic
+in L** (0.046 → 0.029 → 0.058), so there is no trend to extrapolate along.
+
+A bias-corrected estimator is **rejected**: the correction is larger than the effect, differs
+between the clean and disordered cases (different universality classes have different
+finite-size corrections), and is non-monotonic in L in the disordered case. Applying a
+clean-chain correction to a disordered fit would amount to fitting the answer.
+
+> **Pre-registered conclusion, fixed before any model number exists.** At L = 8, 10, 12 the
+> `c_eff` fit **cannot distinguish the clean Ising value `c = 1/2` from the infinite-randomness
+> value `c̃ = ln2/2`.** The finite-size bias (+0.18 to +0.21 disorder-averaged, +0.26 to +0.30
+> typical) exceeds the 0.153 gap between them, and neither an oscillatory term nor an even-ℓ
+> restriction removes it.
+>
+> **`c_eff` is therefore reported as a descriptive quantity with a bootstrap CI, accompanied
+> by this measured bias table, and NO claim of universality-class identification is made from
+> it at these system sizes.** A fitted `c_eff` near 0.5 is **not** evidence for the clean class,
+> and one near 0.35 is **not** evidence for the IRFP class. Any such claim would require
+> L ≳ 64, which needs models this arm does not have.
+
+#### This does not touch the H2 primary
+
+**H2's primary test is the paired per-realization comparison of `S_model(ℓ; r)` against
+`S_exact(ℓ; r)` on the same realization.** It involves no `c_eff` fit, no scaling form, and no
+asymptotic RG target, so **the bias documented above does not affect it at all**. The paired
+test compares two entropy profiles on identical disorder, where exact ground truth is
+available per realization at these sizes.
+
+This sentence must appear in the write-up next to the `c_eff` caveat, so that a reader does not
+mistake a limitation of the secondary descriptive for a limitation of the primary test.
+
 ### A1 — R1's scope, stated in the required words
 
 > **What R1 validates.** R1 validates **this arm's extraction stack** against a published
