@@ -387,7 +387,7 @@ Read this checklist before believing any number:
   hiding it.
 - **Environment:** pinned lockfile committed; `pip freeze` captured into each run's
   provenance.
-- **SLURM (Param Rudra, A100):** sbatch scripts with module loads, `--array` for seed
+- **SLURM (HPC cluster, A100):** sbatch scripts with module loads, `--array` for seed
   sweeps, logs to `logs/%x_%A_%a.out`, checkpoint/resume, sensible walltime and memory,
   and a `--dry-run` local mode so nothing is submitted blind. Note that most of this arm
   is small — exact diagonalization at L ≤ 16 and SVDs of ≤ 65536-dim vectors run fine on

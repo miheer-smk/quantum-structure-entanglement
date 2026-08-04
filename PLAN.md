@@ -352,6 +352,71 @@ written and read by the author. `PREREGISTRATION.md` is committed only after thi
 
 ---
 
+## 3.6 Mandated `PREREGISTRATION.md` text (A1–A3), frozen 2026-08-04
+
+`PREREGISTRATION.md` is **not** created or committed until the author has read the Stage 1.5
+reproduction result. This section holds the text that must be lifted into it verbatim, so the
+wording is fixed now rather than written after the numbers are seen.
+
+### A1 — R1's scope, stated in the required words
+
+> **What R1 validates.** R1 validates **this arm's extraction stack** against a published
+> **probe-gain** number on pinned checkpoints. **It does not validate anything about SAEs.**
+> The SAE line of the predecessor work is **not** reproduced here, and no claim about it
+> should be inferred from R1 passing.
+
+### A2 — H4 restructured: primary axis is per-layer PROBE gain
+
+The published `+0.028`/`+0.029` are probe gains. The natural per-layer quantity is therefore
+the *same* `long_range_zz` incremental-R²-beyond-poly2 measure **extended to all 8 hook
+points**. This extends a published quantity rather than inventing one, requires no SAE
+training, and keeps H4 anchored to something with a published value at one layer.
+
+> **H4 (primary, confirmatory).** Spearman rank correlation across layers between the
+> per-layer probe gain (`long_range_zz` incremental R² beyond poly2-h) and `ΔS_decoded`.
+> **H4 (secondary, EXPLORATORY).** The same rank correlation against the per-layer **SAE**
+> gain (R2). This is labeled exploratory and cannot carry a confirmatory hypothesis, because
+> it is a **new quantity with no published counterpart**.
+> **Stated plainly:** the original brief's "SAE cross-reference" was premised on per-layer SAE
+> data that **does not exist** in the predecessor repository.
+
+Power caveat from K2 stands and is unchanged by this: with 3 blocks / 8 hook points the
+effective n is small and the layer family is not independent. H4 remains underpowered by
+construction; the pre-registration must state the power calculation, not discover it later.
+
+### A3 — H5 AUDITED: the mixed-field null is also a probe result
+
+**Checked, not assumed.** `runs/ra09_mixedfield/scaling_results.json` has row keys
+`probe_r2_trained, probe_r2_untrained, probe_r2_raw_h, probe_r2_mean_h, learned_gain`, and a
+recursive case-insensitive search for "sae" across `runs/ra09_mixedfield/` and
+`results/legacy/ra09_mixedfield.md` returns **nothing**. The mixed-field null is a **probe**
+result, identical in kind to the +0.028 — the same defect, second instance, exactly as
+suspected.
+
+Values: `learned_gain` = **−0.0175 (L=8)**, **−0.0070 (L=10)**; `meta` =
+`n_train=15000, epochs=100, seed=0, Ls=[8,10], g=0.5`.
+
+> **H5 (restated).** In the mixed-field regime, where the **probe** gain collapses
+> (−0.0175 at L=8, −0.0070 at L=10), entanglement tracking should collapse too. H5 concerns
+> the probe-gain measure throughout. **No SAE quantity is involved in the published
+> mixed-field result**, and H5 makes no claim about SAE behaviour in that regime.
+
+**Two further findings from the audit, both recorded rather than absorbed:**
+
+1. **`ra09`'s checkpoints were also never saved** — `meta` is `n_train=15000, epochs=100,
+   seed=0`, the same configuration as `ra08` and different from `ms_trained`. So the
+   mixed-field null, like +0.029, has **no recoverable artifact**. That is a *second*
+   unpinnable published number. It also only reaches L = 10, not L = 12.
+2. **`results/legacy/ra09_mixedfield.md` is mislabeled in the predecessor repo.** Its title
+   reads "RA-08 — L-scaling of the ⟨Z₀Z_{L-1}⟩ signal" and it carries `ra08`'s caption
+   ("the scaling prediction is that this grows with L"), which is meaningless for a null.
+   The *numbers* in it are genuinely `ra09`'s (−0.018, −0.007, matching the JSON). This is a
+   documentation defect in the source, not a data defect; it is flagged here so a reviewer
+   reading that file is not misled, and it must not be silently corrected in the pinned
+   submodule.
+
+---
+
 ## 4. Design conflicts between the brief and the repo that I could not resolve myself
 
 These do not block Stage 0 or Stage 1 — I can build and gate both regardless. They block
@@ -382,13 +447,13 @@ The brief's appendix language ("across 12 layers") does not describe this repo.
 Stage 2 as written ("existing trained checkpoints, L = 8, 10, 12, ≥ 5 seeds") cannot run.
 Only L = 8 exists, at 10 seeds. Getting to L = 10 and 12 at 5 seeds each means training 10
 new models. From `ra08_scaling` timings (~1840 s at L=8, ~2119 s at L=10, including probe
-work) this is on the order of a few hours on the GB10 — tractable, but it is **new training,
+work) this is on the order of a few hours on the local workstation — tractable, but it is **new training,
 not reuse**, and it is scope the brief did not budget. It also interacts with K1: if the
 answer to K1 is (b), these models should be trained on clean fields, and then there is no
 reason to train disordered ones.
 
-**K4 — Hardware.** The brief's Part 9 specifies SLURM on Param Rudra / A100. This machine is
-an NVIDIA GB10 (121 GB unified memory, 20 cores), local, no SLURM. I will write the
+**K4 — Hardware.** The brief's Part 9 specifies SLURM on an HPC cluster (A100). This arm runs on a local workstation with no SLURM; exact hardware specifics stay in
+gitignored local config. I will write the
 `slurm/` scripts as specified so they are submittable elsewhere, but Stages 0 and 1 are
 pure CPU and will run locally in minutes. I will not fabricate a SLURM job ID in the
 provenance header when there is none — it will be recorded as `null`.

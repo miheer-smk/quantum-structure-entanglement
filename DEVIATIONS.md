@@ -108,3 +108,32 @@ dead fraction, and reconstruction MSE, and **no gain quantity at all**. The `+0.
 figures are **probe** gains on raw activations, not SAE quantities. H4's x-axis must therefore
 be produced by this arm and reported as new work, and the reproduction gate applies to the
 probe measure (R1), not to the SAE measure (R2), which has no published counterpart.
+
+## 2026-08-04 — H4 primary axis changed to per-layer probe gain; H5 restated
+
+**Deviation.** H4's pre-registered x-axis was "the layer of maximum SAE feature gain". No such
+quantity exists (see the 2026-08-04 Stage 1.5 entry). H4's **primary, confirmatory** axis
+becomes the per-layer `long_range_zz` incremental-R²-beyond-poly2 **probe** gain, extended to
+all 8 hook points — which *extends* the published quantity instead of inventing one. The
+per-layer **SAE** gain is retained as a **secondary, EXPLORATORY** axis; a new quantity with
+no published counterpart cannot carry a confirmatory hypothesis.
+
+**H5 audited, not assumed.** `runs/ra09_mixedfield/scaling_results.json` carries the keys
+`probe_r2_{trained,untrained,raw_h,mean_h}` and `learned_gain`; a recursive case-insensitive
+search for "sae" across the mixed-field artifacts returns nothing. The mixed-field null is a
+**probe** result — the same defect, second instance. H5 is restated to concern the probe
+measure throughout, with `learned_gain` = −0.0175 (L=8), −0.0070 (L=10), `g=0.5`.
+
+**Also found:** `ra09` ran at `n_train=15000, epochs=100, seed=0` — same as `ra08` — so its
+checkpoints were **also never saved**. Two published numbers, not one, have no recoverable
+artifact. Recorded in `AUTHOR_HANDOFF.md`. Separately,
+`results/legacy/ra09_mixedfield.md` is **mislabeled** in the predecessor repo (titled "RA-08",
+carrying RA-08's caption, with RA-09's numbers). Left uncorrected in the pinned submodule so
+the pin reflects what was published.
+
+## 2026-08-04 — Cluster and hardware identifiers redacted (Brief 1.5)
+
+**Deviation.** The brief's Part 9 names a specific national HPC cluster. Replaced with a
+generic "HPC cluster" in all committed text, including inside the archived copy of the brief,
+because the cluster name narrows the institution. Machine specifics live in gitignored local
+config. This is the one place the archived brief departs from the author's verbatim text.
