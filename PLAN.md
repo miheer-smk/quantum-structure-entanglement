@@ -380,9 +380,50 @@ training, and keeps H4 anchored to something with a published value at one layer
 > **Stated plainly:** the original brief's "SAE cross-reference" was premised on per-layer SAE
 > data that **does not exist** in the predecessor repository.
 
-Power caveat from K2 stands and is unchanged by this: with 3 blocks / 8 hook points the
-effective n is small and the layer family is not independent. H4 remains underpowered by
-construction; the pre-registration must state the power calculation, not discover it later.
+### A2a — H4 power limitation, pre-registered in advance (frozen 2026-08-04)
+
+Stated **before** H4 is run, with the arithmetic done rather than asserted. Exact
+enumeration of the Spearman permutation null (`itertools.permutations`, all `n!` orderings):
+
+| n (hook points) | permutations | attainable ρ values | two-sided p at ρ = +1 | ρ needed for p < 0.05 |
+|---|---|---|---|---|
+| 3 (block outputs only) | 6 | 4 | 0.3333 | **unreachable at any ρ** |
+| 4 (+ embedding) | 24 | 11 | 0.0833 | **unreachable at any ρ** |
+| **7 (the family used)** | **5040** | **57** | **3.968e-04** | **0.7857** |
+
+**Correction to an earlier estimate.** A working figure of "p ≈ 0.008 at n = 7" was in
+circulation. It is wrong: the exact two-sided floor is **3.968e-04** (`2/5040`). The
+practical consequence differs from what that figure implied — at 3.968e-04 the test *does*
+survive Holm correction for any layer family up to **125 tests** (`m × 3.968e-04 < 0.05`
+⟺ `m ≤ 125`). H4 is not killed by multiplicity.
+
+**What actually limits H4**, stated as the pre-registered caveat:
+
+1. **Only near-perfect monotonicity is detectable.** `ρ ≥ 0.7857` is required for p < 0.05
+   at n = 7. Any genuine-but-imperfect layerwise correspondence is undetectable at this n.
+2. **The p-value is coarsely quantised** — 57 attainable ρ values, so p moves in visible
+   jumps and small ρ differences are not resolvable.
+3. **The 7 points are not independent.** The attention and MLP residual writes within a
+   block are strongly coupled, so the permutation null's exchangeability assumption is
+   questionable and the *effective* n lies between 3 and 7. At the conservative end
+   (n = 3 or 4, block outputs only) **p < 0.05 is unreachable at any ρ whatsoever**.
+
+**Therefore, pre-registered now:**
+
+> **H4 is reported as an EFFECT SIZE (Spearman ρ) WITH A BOOTSTRAP CI. The significance
+> test is declared underpowered and is NOT the basis of any claim.** A p-value may be shown
+> for completeness, alongside the n, the floor, and the ρ threshold above; it will not be
+> interpreted as support or refutation.
+>
+> **A null H4 at this n is uninformative — it is NOT evidence of dissociation between
+> dictionary-learning features and physics-native entanglement.** The brief's framing of a
+> CI spanning zero as "a genuinely interesting dissociation" does **not** apply at n = 7,
+> because a CI spanning zero is the expected outcome for any true ρ below ≈ 0.79. Claiming
+> dissociation would require either more layers (a deeper model) or a different estimator
+> with a declared power analysis.
+
+This is a pre-registration statement, not a Stage 4 finding. It is fixed before the number
+exists so it cannot be relaxed after seeing it.
 
 ### A3 — H5 AUDITED: the mixed-field null is also a probe result
 
