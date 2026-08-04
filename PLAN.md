@@ -352,6 +352,51 @@ written and read by the author. `PREREGISTRATION.md` is committed only after thi
 
 ---
 
+## 3.55 PAPER SPINE — confirmatory vs exploratory split (author-directed, frozen 2026-08-04)
+
+Restructured **before Stage 2**, not discovered after Stage 4. This is pre-registration text.
+
+**The structural fact.** The model has **3 blocks** → 7 residual-stream hook points. H3 (depth
+profile) and H4 (layer coincidence) both require a *resolvable depth axis*; 3 blocks do not
+provide one, and no amount of pre-registration fixes that. H1 and H2 need no depth axis at
+all, are fully powered by the 50,000-realization ensemble, and carry the quantitative result.
+
+### CONFIRMATORY — the spine
+
+> **H1 — FSS collapse in δ_r.** `S_model(δ_r; L)` collapses onto a single scaling function
+> when plotted against `δ_r = δ·L^{1/ν}`, `ν = 2`, matching the collapse of `S_exact` on the
+> same realizations. Tested on the δ-stratified sub-ensemble, which is in-distribution.
+>
+> **H2 — paired per-realization entropy agreement**, primary; `c_eff` vs the `ln2/12` slope,
+> secondary. Exact ground truth is available per realization, pairing removes
+> realization-to-realization variance, and neither depends on asymptotic RG convergence.
+
+Both are powered by realization count, not by depth, so the architecture's shallowness does
+not touch them.
+
+### EXPLORATORY — H3 and H4
+
+> **H3 and H4 are EXPLORATORY. The reason is the model's shallowness: 3 blocks give 7 hook
+> points, of which only 3 are block outputs, and the 7 are not mutually independent because
+> attention and MLP residual writes within a block are strongly coupled. The depth axis is
+> therefore not resolvable, and no result along it can be confirmatory.** See §A2a for the
+> exact power arithmetic: `ρ ≥ 0.7857` is required for p < 0.05 at n = 7, and at n = 3 or 4
+> significance is unreachable at any ρ.
+
+This appears in the pre-registration, **not** in a later limitations section. A depth result
+reported as confirmatory and then walked back in limitations is the failure mode this split
+exists to prevent.
+
+### What would make H3/H4 confirmatory
+
+Deeper models — enough blocks for a resolvable depth axis. That is **a separate arm**, and it
+**breaks checkpoint reuse for H4**: new models are not the `ms_trained` checkpoints the
+published probe gain was measured on, so the cross-reference to the SAE line would no longer
+be anchored to shared artifacts. Noted here as the honest path forward. **Not to be done in
+this arm.**
+
+---
+
 ## 3.6 Mandated `PREREGISTRATION.md` text (A1–A3), frozen 2026-08-04
 
 `PREREGISTRATION.md` is **not** created or committed until the author has read the Stage 1.5

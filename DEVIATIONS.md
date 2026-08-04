@@ -173,3 +173,22 @@ still passed, because the ED/free-fermion gate holds for any `h`; the `delta_r` 
 have been false while the suite stayed green. Caught by an out-of-band provenance comparison
 against the pinned ensemble. `test_spanning_realizations_match_pinned_ensemble` and
 `test_spanning_realizations_actually_span` are now permanent parts of the gate.
+
+## 2026-08-04 — Paper spine: H1/H2 confirmatory, H3/H4 exploratory
+
+**Deviation.** The brief treats H1–H5 as a flat set. This arm designates **H1 and H2 as
+confirmatory** and **H3 and H4 as exploratory**, in the pre-registration rather than in a
+limitations section. Reason, stated in advance: the model has 3 blocks, so the depth axis
+H3/H4 require is not resolvable (7 hook points, only 3 of them block outputs, and not
+mutually independent). H1/H2 need no depth axis and are powered by realization count.
+Making H3/H4 confirmatory would require deeper models — a separate arm, which would also
+break checkpoint reuse for H4. Noted, not done.
+
+## 2026-08-04 — Standing rule added: a check is not a gate until shown able to fail
+
+Three "looked right, unverified source" errors reached committed code during Stage 0, each
+passing every test then in existence: fabricated `h` vectors (invisible to a gate that holds
+for any `h`), a regex returning the partial-correlation `0.560` in place of the
+incremental-R² `0.0283`, and a mirrored entropy profile (invisible to the `c_eff` fit, which
+returns identical `c_eff` and identical residuals under `l -> L-l`). `CLAUDE.md` now requires
+every validation check to be demonstrated capable of failing on the error it targets.

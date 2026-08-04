@@ -76,6 +76,8 @@ ALLOWED_INLINE = {
     "SPANNING_DELTA": "test_spanning_realizations_match_pinned_ensemble",
     "SPANNING_INDICES": "test_spanning_realizations_match_pinned_ensemble",
 }
+# tests/test_orientation.py verifies its own inlined vector in that file
+ALLOWED_INLINE_OTHER = {"ASYM_H": "test_asym_realization_matches_pinned_ensemble"}
 MIN_FLAGGED_LEN = 4
 
 
@@ -104,7 +106,7 @@ def test_no_unverified_inlined_float_arrays_in_tests():
     for path in sorted((repo_root() / "tests").glob("*.py")):
         for names, n in _inlined_numeric_collections(path):
             for name in names:
-                if name not in ALLOWED_INLINE:
+                if name not in ALLOWED_INLINE and name not in ALLOWED_INLINE_OTHER:
                     offenders.append(f"{path.name}::{name} ({n} numeric literals)")
     assert not offenders, (
         "Inlined numeric arrays without pinned provenance:\n  " + "\n  ".join(offenders)
@@ -114,6 +116,7 @@ def test_no_unverified_inlined_float_arrays_in_tests():
 
 def test_allowed_inline_entries_have_a_live_verifier():
     """ALLOWED_INLINE must not become a place to park unverified constants."""
-    src = (repo_root() / "tests" / "test_exact_entropy.py").read_text()
-    for name, verifier in ALLOWED_INLINE.items():
+    src = "".join((repo_root() / "tests" / f).read_text()
+                  for f in ("test_exact_entropy.py", "test_orientation.py"))
+    for name, verifier in {**ALLOWED_INLINE, **ALLOWED_INLINE_OTHER}.items():
         assert f"def {verifier}(" in src, f"{name} claims {verifier}, which does not exist"
