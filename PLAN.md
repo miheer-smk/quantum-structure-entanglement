@@ -479,6 +479,73 @@ available per realization at these sizes.
 This sentence must appear in the write-up next to the `c_eff` caveat, so that a reader does not
 mistake a limitation of the secondary descriptive for a limitation of the primary test.
 
+### A0b — H1 collapse feasibility on EXACT ground truth: TESTABLE, H1 stands
+
+Same discipline as A0: the hypothesis's machinery tested on data where the answer is known,
+**with no model involved**. `S_exact(ℓ = L/2)` computed per realization, binned in δ_r,
+N = 12,000 per L.
+
+**Collapse quality `Q`** — bin δ_r on a common grid, take the mean profile per L, remove a
+per-L additive offset (the FSS ansatz fixes the shape, not the constant), and report the
+residual spread across L divided by the consensus curve's dynamic range. `Q = 0` is perfect
+collapse. Bootstrap over realizations, 400 resamples.
+
+| collapse variable | Q | bootstrap 95% CI |
+|---|---|---|
+| **ν = 2** (`δ·L^{1/2}`, the pre-registered variable) | **0.0091** | **[0.0095, 0.0152]** |
+| ν = 1 (`δ`, wrong exponent — control) | 0.0376 | [0.0413, 0.0710] |
+
+**Exact ground truth collapses at L = 8, 10, 12, and the ν = 2 variable outperforms the ν = 1
+control by ~4×, with non-overlapping CIs.** The control matters: without it, a small `Q`
+could simply mean the binning is coarse. It does not — the wrong exponent gives a visibly
+worse collapse on the same bins.
+
+*(The point estimate sits marginally below its own bootstrap CI, 0.0091 vs a [0.0095, …]
+lower bound. That is ordinary upward bootstrap bias — resampling injects noise that inflates
+a residual-spread statistic. Reported rather than tidied; the comparison against the ν = 1
+control is unaffected since both are computed identically.)*
+
+**H1 as written is testable and stands.** The fallback below is therefore NOT triggered, but
+is pre-registered anyway so the decision is fixed in advance:
+
+> **Pre-registered H1 fallback (not currently triggered).** Should the collapse test prove
+> unusable on model data — e.g. `Q_model` indistinguishable from the ν = 1 control — H1
+> reverts to the **paired per-realization statement**: does `S_model` track `S_exact` as a
+> function of δ_r **at fixed L**? That needs no cross-L collapse, uses only the pinned L = 8
+> ensemble, and is unaffected by everything in A0.
+
+#### Pinned-ensemble gap — explicit answer
+
+**Only L = 8 has a pinned ensemble.** The L = 10 and L = 12 rows above use reference-only
+generated chains under a documented separate RNG (`default_rng(20260804 + L)`), which is
+legitimate here because **no model is involved** — this measures a property of exact physics
+and of the estimator, not of any trained network.
+
+> **For a claim-bearing H1, pinned L = 10 and L = 12 ensembles MUST be generated and hashed
+> first**, and added to `pins/ensemble.sha256`, before any cross-L collapse result is
+> reported as a finding. This also interacts with K3: no L = 10/12 *checkpoints* exist
+> either, so a cross-L H1 needs both new ensembles **and** new training. The fixed-L fallback
+> above needs neither.
+
+### A0c — Clean-vs-disordered `c_eff` gap, bootstrapped (descriptive only)
+
+4,000 bootstrap resamples over realizations of the `|δ_r| < 0.05` sub-ensemble; the clean-chain
+value is deterministic (a single chain), so the CI comes entirely from the disordered side.
+
+| L | clean | disordered | gap | bootstrap 95% CI | spans 0? |
+|---|---|---|---|---|---|
+| 8 | 0.5881 | 0.5419 | +0.0463 | [+0.0103, +0.0817] | no |
+| 10 | 0.5845 | 0.5557 | +0.0288 | **[−0.0028, +0.0603]** | **YES** |
+| 12 | 0.5809 | 0.5229 | +0.0580 | [+0.0285, +0.0869] | no |
+
+**At L = 10 the CI spans zero** — stated plainly. The non-monotonicity flagged in A0 is now
+quantified: the three gaps are mutually consistent within their CIs, so the apparent ordering
+(0.046 → 0.029 → 0.058) carries no signal. Every gap is far below the asymptotic 0.15343.
+
+**Strictly descriptive. Consistent with the A0 decision: no universality-class claim is made
+from `c_eff` at these system sizes**, and these CIs do not license one — a gap distinguishable
+from zero is not a gap that identifies a fixed point.
+
 ### A1 — R1's scope, stated in the required words
 
 > **What R1 validates.** R1 validates **this arm's extraction stack** against a published

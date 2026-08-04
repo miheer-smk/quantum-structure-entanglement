@@ -280,7 +280,39 @@ and is non-monotonic in L, so applying it would amount to fitting the answer.
 `S_model(ℓ; r)` against `S_exact(ℓ; r)` uses no `c_eff` fit, no scaling form, and no asymptotic
 target. The bias above is a limitation of a secondary descriptive only.
 
-## 9. Still to run
+## 9. H1 collapse feasibility on exact ground truth — TESTABLE
+
+`S_exact(ℓ=L/2)` vs δ_r, N = 12,000 per L, no model involved. Collapse quality `Q` =
+across-L residual spread after removing a per-L additive offset, over the consensus curve's
+dynamic range; 400 bootstrap resamples.
+
+| collapse variable | Q | bootstrap 95% CI |
+|---|---|---|
+| **ν = 2** (`δ·L^{1/2}`, pre-registered) | **0.0091** | **[0.0095, 0.0152]** |
+| ν = 1 (wrong exponent, control) | 0.0376 | [0.0413, 0.0710] |
+
+**Exact ground truth collapses, and ν = 2 beats the ν = 1 control ~4× with non-overlapping
+CIs.** The control is what makes this informative — a small `Q` alone could just mean coarse
+binning. **H1 stands; the fallback is pre-registered but not triggered** (`PLAN.md` §A0b).
+
+**Pinned-ensemble gap, explicit:** only L = 8 is pinned. L = 10/12 here are reference-only
+generated chains, legitimate because no model is involved. **A claim-bearing cross-L H1
+requires pinned L = 10/12 ensembles generated and hashed first** — and, per K3, new training
+too, since no L = 10/12 checkpoints exist. The fixed-L fallback needs neither.
+
+## 10. Clean-vs-disordered `c_eff` gap, bootstrapped
+
+| L | clean | disordered | gap | 95% CI | spans 0? |
+|---|---|---|---|---|---|
+| 8 | 0.5881 | 0.5419 | +0.0463 | [+0.0103, +0.0817] | no |
+| 10 | 0.5845 | 0.5557 | +0.0288 | **[−0.0028, +0.0603]** | **YES** |
+| 12 | 0.5809 | 0.5229 | +0.0580 | [+0.0285, +0.0869] | no |
+
+**At L = 10 the CI spans zero.** The three gaps are mutually consistent within CI, so the
+apparent non-monotonic ordering carries no signal. All are far below the asymptotic 0.15343.
+Descriptive only — per §8 and `PLAN.md` §A0, no universality-class claim follows.
+
+## 11. Still to run
 
 Toy closed-form cases (product → 0; Bell → ln 2; GHZ → ln 2 at every internal cut;
 W → `H₂(ℓ/L)`; TFIM L=8 vs Stage 0 golden values), the untruncated-spectrum assertion, the
