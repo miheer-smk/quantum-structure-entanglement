@@ -214,3 +214,109 @@ sizes. H2's PRIMARY (paired per-realization `S_model` vs `S_exact`) is unaffecte
 **Reference data note.** L = 10 and L = 12 disordered chains used for this measurement were
 generated reference-only under a documented separate RNG. They are explicitly NOT a pinned
 ensemble and are never used for any model claim; only L = 8 has a pinned ensemble.
+
+## 2026-08-11 — Remote repository exists, is PUBLIC, and has diverged; licensing is contradictory
+
+**Recorded on discovery, before any corrective action.** Nothing below has been changed. No
+`LICENSE` was written, no `README.md` line was edited, and the local branch has **not** been
+synced to the remote. The only mutation performed was `git fetch origin`, which advances the
+read-only `origin/main` tracking ref and touches neither the working tree nor `main`.
+
+### (1) A remote exists, contrary to the plan of record
+
+`PLAN.md` §4B.3a recommended option (iii) — `git init` locally, **no remote** — and §8 records
+that as the execution order. §7 lists "create a repo; push; add a remote" among the actions not
+to be taken without the author's instruction. A remote nevertheless exists:
+
+| | |
+|---|---|
+| Remote | `git@github.com:miheer-smk/quantum-structure-entanglement.git` |
+| Created | 2026-08-04T18:19:57Z |
+| Last push | 2026-08-04T18:39:55Z |
+
+The repository was created and pushed by the author directly. This is not a deviation committed
+by the assistant; it is recorded here because the plan of record says no remote exists, and a
+reader of `PLAN.md` alone would be wrong about the project's outward-facing state.
+
+### (2) The repository is PUBLIC, where D3 and §4B specified private
+
+`PLAN.md` §4B and Decision **D3** both specify a **new private repo**
+(`gh repo create <name> --private`). The GitHub API reports otherwise, and an
+**unauthenticated** request succeeds (HTTP 200), which is itself proof of public readability:
+
+```
+private:    False
+visibility: public
+```
+
+**Consequences that follow from public visibility, stated plainly:**
+
+- The unpublished pre-registration, the two Stage results files, and every measured number in
+  them are world-readable now. Pre-registration is *supposed* to be public, but normally after
+  it is frozen, not while it is still being written.
+- `AUTHOR_HANDOFF.md` publicly documents defects in the predecessor work — two published
+  numbers with no recoverable artifacts, and a mislabeled file in `quantum-structure-sae`.
+  That is honest and belongs in the paper, but it is currently disclosed with no surrounding
+  context and before any co-author has seen it.
+- The anonymizability rule in `CLAUDE.md` exists so the repo can be shared as an anonymized
+  snapshot for double-blind review. A public repo under the author's own account, already
+  indexed, forecloses anonymous submission to any venue that requires it.
+
+**No action taken.** Whether the repository should be public is the author's decision and is
+being escalated, not resolved here.
+
+### (3) Local has diverged from the remote by one commit
+
+| Ref | SHA | Contents |
+|---|---|---|
+| local `main` | `2ee2833` | "Add README and citation metadata" |
+| `origin/main` | `58d1b79` | local `main` + one commit |
+
+The extra commit is:
+
+```
+58d1b7952fac28dd6dcee25a05c0bc8aa7f9df8c
+subject:   Add MIT License to the project
+author:    Miheer Satish Kulkarni <miheer.smk@gmail.com>
+committer: GitHub <noreply@github.com>
+date:      Wed Aug 5 00:09:55 2026 +0530
+files:     LICENSE | 21 +++++++++++++++++++++
+```
+
+The `GitHub <noreply@github.com>` committer identity shows this was made through the GitHub web
+UI, not from this machine — which is why the file never existed locally.
+
+**Attribution is clean.** A trailer scan over the full history *including* the remote-only
+commit returns **0** matches for `Co-Authored-By` / `Generated with`. The Brief 1.4 verification
+still prints CLEAN over full history.
+
+### (4) The licensing state is self-contradictory, in three places at once
+
+All three are live on the public remote simultaneously:
+
+| Artifact | What it says |
+|---|---|
+| `LICENSE` (remote only, `58d1b79`) | **MIT** — grants use, modification, sublicense, and sale to anyone |
+| `README.md` §License (lines 240–242) | "None yet — **all rights reserved** pending publication" |
+| `CITATION.cff` | `license-url` points at that README anchor; message reads "Unpublished work in progress. Please contact the author before citing any result" |
+
+MIT and all-rights-reserved are not reconcilable: one grants redistribution rights
+unconditionally, the other reserves them. `CITATION.cff` compounds it by pointing its
+`license-url` at the README's *disclaimer of* a license. `PLAN.md` D5 also records
+"`LICENSE` (MIT …) already name the sole author correctly" as resolved — but no `LICENSE`
+existed in the tracked tree at that time, so D5 was resolved against a file that was not there.
+
+**Two lesser inconsistencies in the same material:**
+
+- **Copyright name.** `LICENSE` reads "Copyright (c) 2026 Miheer Satish Kulkarni"; `CITATION.cff`
+  gives `family-names: Kulkarni, given-names: Miheer`; `PLAN.md` D5 quotes
+  "Copyright (c) 2026 Miheer Kulkarni". Three spellings of the copyright holder.
+- **Author email.** Every commit on local `main` uses
+  `222050236+miheer-smk@users.noreply.github.com`, per D1. The remote-only commit uses a
+  personal address, `miheer.smk@gmail.com`. On a public repo that is a deanonymization vector
+  against the `CLAUDE.md` anonymizability rule. It is already pushed, and Brief 1.3 forbids
+  rewriting pushed history, so it stands — recorded rather than corrected.
+
+**Nothing here has been changed pending the author's decision.** Per `CLAUDE.md`, changing
+`LICENSE` or `CITATION.cff` requires the author's instruction, and the README/LICENSE conflict
+cannot be resolved by picking one without knowing which posture is intended.
