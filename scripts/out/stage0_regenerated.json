@@ -1,0 +1,120 @@
+{
+  "_provenance": {
+    "artifact_sha256": {
+      "data/tfim_L8_N50k_seed1.pt": "10aacd0f50a4d16f8c3b1fc66bd8c4ddac6e5e8ac12c75b144306f16e5bec9f4",
+      "data/tfim_L8_N50k_seed2.pt": "2bfc7dab9e5dc2db28385ed1e35db1464e7d28d0b2c3682f61c3df781cedf1c0",
+      "data/tfim_L8_N50k_seed3.pt": "bf0bfa8597bee1decb18e9169015bcd92887d95ef131460b1c71922a9173a159",
+      "runs/ms_trained/seed1/best.pt": "f1dcf0903f264b0aa4eab4addd02a6a5b30040ea24825ec7e01a7a555161e83b"
+    },
+    "base_image_digest": "nvcr.io/nvidia/pytorch@sha256:43c018d6a12963f1a1bad85ef8574b5c2a978eec2be0ebcacfb87f69e0d210e1",
+    "hostname_class": "linux-aarch64-20core",
+    "numpy": "2.1.0",
+    "python": "3.12.3",
+    "repo_git_sha": "76ae243be782b0c7278ae057d16c7c295da259df",
+    "repo_working_tree_dirty": true,
+    "rng_seeds": {},
+    "slurm_job_id": null,
+    "submodule_sha": "0c4e6e4a8a0fb68aec6820eea8c7eed49d05a539",
+    "torch": "2.13.0a0+8145d630e8.nv26.06",
+    "wall_clock_utc": "2026-08-11T17:37:47Z"
+  },
+  "section1_cross_validation": {
+    "n_cases": 14,
+    "per_case_ed_vs_free_fermion": {
+      "disordered_r0_ordered": 2.964295475749168e-14,
+      "disordered_r1": 4.852118706821784e-12,
+      "disordered_r2_critical": 4.016231791581504e-14,
+      "disordered_r3": 1.467675980748595e-11,
+      "disordered_r4_paramagnetic": 2.2761237339352647e-12,
+      "uniform_h0.5_L10": 7.749356711883593e-14,
+      "uniform_h0.5_L12": 1.8041124150158794e-13,
+      "uniform_h0.5_L8": 1.6480594666745674e-11,
+      "uniform_h1.0_L10": 2.1083135237631723e-13,
+      "uniform_h1.0_L12": 5.841438444065261e-13,
+      "uniform_h1.0_L8": 4.546363285840016e-14,
+      "uniform_h2.0_L10": 4.699601818813903e-12,
+      "uniform_h2.0_L12": 1.0872011624307731e-11,
+      "uniform_h2.0_L8": 4.886507865009548e-13
+    },
+    "site_blind_vs_ed": {
+      "disordered_r0_ordered": 0.15145133525458387,
+      "disordered_r1": 0.45960796379716934,
+      "disordered_r2_critical": 0.46356965713249965,
+      "disordered_r3": 0.3612559728788698,
+      "disordered_r4_paramagnetic": 0.03858663090394181,
+      "uniform_h0.5_L8": 1.6480594666745674e-11,
+      "uniform_h1.0_L8": 4.546363285840016e-14,
+      "uniform_h2.0_L8": 4.886507865009548e-13
+    },
+    "worst_ed_vs_free_fermion": 1.6480594666745674e-11
+  },
+  "section2_hook_family": {
+    "encoder_norm_is_none": true,
+    "max_abs_diff_k6_vs_published": 1.0132789611816406e-06,
+    "max_abs_diff_post_final_norm_vs_published": 2.3907701671123505,
+    "n_realizations": 512,
+    "rms_by_hook": {
+      "block0_attn": 0.1270135094295725,
+      "block0_mlp": 0.19269907211742596,
+      "block1_attn": 0.7985017678574433,
+      "block1_mlp": 0.9484066510942787,
+      "block2_attn": 1.4051160581152196,
+      "block2_mlp": 1.6351219238841557,
+      "embed": 0.031178812519792192
+    }
+  },
+  "section3_spanning": {
+    "delta_r": {
+      "r0_ordered": 1.9999462446035938,
+      "r1": 0.9999907322805658,
+      "r2_critical": 3.760718370379135e-08,
+      "r3": -1.0000990422483191,
+      "r4_paramagnetic": -2.000674095997631
+    },
+    "indices": {
+      "r0_ordered": 29086,
+      "r1": 40316,
+      "r2_critical": 49390,
+      "r3": 28980,
+      "r4_paramagnetic": 11303
+    }
+  },
+  "section4_ensemble": {
+    "E_ln_h_closed_form": -0.14918269977931833,
+    "lnJ_minus_lnh": 0.14918269977931833,
+    "mean_delta_r_by_L": {
+      "L10": 0.6653032973976545,
+      "L12": 0.7288032471345268,
+      "L8": 0.5950653594543658
+    },
+    "occupancy": {
+      "abs_delta_lt_0.05": {
+        "count": 5503,
+        "share_pct": 3.6686666666666667
+      },
+      "abs_delta_lt_0.10": {
+        "count": 10980,
+        "share_pct": 7.32
+      },
+      "abs_delta_lt_0.25": {
+        "count": 27154,
+        "share_pct": 18.102666666666668
+      },
+      "abs_delta_lt_0.50": {
+        "count": 52545,
+        "share_pct": 35.03
+      },
+      "delta_lt_0": {
+        "count": 44079,
+        "share_pct": 29.386
+      }
+    },
+    "per_seed_E_ln_h": {
+      "seed1": -0.14979907846336077,
+      "seed2": -0.14895087140814822,
+      "seed3": -0.14800551532232692
+    },
+    "pooled_N": 150000,
+    "sd_ln_h_closed_form": 0.7090857968704362
+  }
+}
