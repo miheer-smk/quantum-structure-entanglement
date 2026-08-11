@@ -320,3 +320,60 @@ existed in the tracked tree at that time, so D5 was resolved against a file that
 **Nothing here has been changed pending the author's decision.** Per `CLAUDE.md`, changing
 `LICENSE` or `CITATION.cff` requires the author's instruction, and the README/LICENSE conflict
 cannot be resolved by picking one without knowing which posture is intended.
+
+## 2026-08-11 — The environment behind the Stage 0/1 tables was never recorded; this is a RECONSTRUCTION
+
+**Stated as plainly as it can be: the software environment that produced every number in
+`RESULTS_STAGE0.md` and `RESULTS_STAGE1.md` was never recorded, and cannot be recovered.**
+
+At the point this entry was written, no Python environment capable of running the suite
+existed on the machine holding the repository — no `pytest`, `numpy`, `scipy`, `torch` or
+`scikit-learn` anywhere on the filesystem, no virtualenv, no conda, no lockfile.
+`pyproject.toml` declared `["numpy", "scipy", "torch", "scikit-learn", "pyyaml"]` with **no
+version constraints of any kind**. The committed tables therefore rested on an environment
+that is not described anywhere in the repository's history.
+
+This is the same defect class as the fabricated `h` vectors and the unanchored regex, in a
+third set of clothes: **a result whose provenance nobody checked.** A repository that
+hash-pins 35 artifacts and a submodule SHA, while leaving the software that reads them
+entirely unpinned, pins identity of the inputs and not identity of the computation.
+
+### What was built
+
+| Layer | Pin | File |
+|---|---|---|
+| Base image | `nvcr.io/nvidia/pytorch@sha256:43c018d6a129…d210e1` — **digest, not tag** | `env/base-image.digest`, `env/Dockerfile` |
+| Added packages | exact `==` pins incl. full transitive closure | `env/requirements.lock` |
+| Invocation | read-only artifact mount, `OMP_NUM_THREADS=4` | `env/run.sh` |
+
+The tag `nvcr.io/nvidia/pytorch:26.06-py3` is deliberately **not** the pin — tags are mutable.
+Base versions: python 3.12.3, numpy 2.1.0, scipy 1.17.1, torch 2.13.0a0+8145d630e8.nv26.06,
+PyYAML 6.0.1. None are upgraded; upgrading numpy or scipy would silently change `eigvalsh`
+and the RNG streams every committed number depends on.
+
+`pennylane==0.45.1` is installed for one reason, recorded so it is not mistaken for scope
+creep: the pinned checkpoints are pickles referencing `qsae.reverse_arrow.transformer`, and
+`qsae/__init__.py` eagerly imports `.qnn` → pennylane, so `torch.load` on a pinned checkpoint
+cannot succeed without it. **This arm never evaluates a quantum circuit.** Making that import
+lazy would mean editing the pinned submodule, which the pin contract forbids.
+
+### This is a reconstruction, not the original, and is validated rather than assumed
+
+**It is not claimed that this environment is the one that produced the committed tables.** It
+demonstrably is not the same by construction — the original is unknown. Two observations that
+prove non-identity rather than hide it:
+
+1. The suite runs in **~34 s** here against the **219 s** recorded in `RESULTS_STAGE1.md`.
+   Different hardware, and the arm64 GB10 machine this now runs on may not even be the machine
+   the tables were produced on.
+2. `pytest` here is 9.1.1; the original version is unknown and unknowable.
+
+The reconstruction is therefore **validated empirically, by regenerating every committed
+number from pinned artifacts and diffing against what is in the results files** — not by
+assertion that the versions are right. That regeneration, its committed scripts under
+`scripts/`, and the value-by-value diff table are the acceptance test. Author-directed
+(2026-08-11): any mismatch beyond stated precision stops all other work immediately.
+
+**First run of the reconstructed environment: 57 passed.** The submodule pin asserts, and all
+35 pinned artifact hashes verify. This establishes only that the suite is green here; it says
+nothing yet about whether the *numbers* match, which is what the acceptance test measures.

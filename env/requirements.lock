@@ -1,0 +1,65 @@
+# Exact package pins for the qsent analysis environment.
+#
+# Two layers, and the distinction matters for reproducibility:
+#
+#   BASE      — shipped inside the digest-pinned base image. NOT installed by us and NOT
+#               upgraded. Pinning the image digest pins these transitively. They are listed
+#               here so the versions are legible without pulling a 35 GB image.
+#   INSTALLED — added on top of the base by env/Dockerfile. These are the only packages this
+#               repo chooses, and they are pinned exactly, including transitive dependencies.
+#
+# Base image digest lives in env/base-image.digest and is the authority; the tag
+# `nvcr.io/nvidia/pytorch:26.06-py3` is NOT used as a pin because tags are mutable.
+
+# ---------------------------------------------------------------------------------------
+# BASE (from the pinned image — do not install, do not upgrade)
+# ---------------------------------------------------------------------------------------
+# python==3.12.3
+# numpy==2.1.0
+# scipy==1.17.1
+# torch==2.13.0a0+8145d630e8.nv26.06
+# PyYAML==6.0.1
+
+# ---------------------------------------------------------------------------------------
+# INSTALLED (env/Dockerfile installs exactly this closure)
+# ---------------------------------------------------------------------------------------
+scikit-learn==1.9.0
+pytest==9.1.1
+
+# transitive closure of the two above, pinned so resolution cannot drift
+iniconfig==2.3.0
+joblib==1.5.3
+narwhals==2.24.0
+pluggy==1.6.0
+threadpoolctl==3.6.0
+
+# ---------------------------------------------------------------------------------------
+# PINNED SUBMODULE's OWN RUNTIME DEPENDENCIES
+# ---------------------------------------------------------------------------------------
+# Required because the ms_trained checkpoints are pickles referencing
+# `qsae.reverse_arrow.transformer.TFIMTransformer`, and `qsae/__init__.py` eagerly imports
+# `.qnn`, which imports pennylane. So `torch.load` on a pinned checkpoint cannot succeed
+# without pennylane present, even though THIS ARM NEVER EVALUATES A QUANTUM CIRCUIT.
+#
+# The alternative — making that import lazy — would mean editing the pinned submodule, and
+# the pin must reflect what was published. Installing the predecessor's own declared
+# dependencies (quantum-structure-sae/pyproject.toml) is the option that leaves the pin
+# intact. matplotlib, tqdm and einops are also declared there and are already in the base.
+pennylane==0.45.1
+pennylane_lightning==0.45.0
+
+# transitive closure of pennylane
+appdirs==1.4.4
+autograd==1.8.0
+autoray==0.8.4
+cachetools==7.1.7
+diastatic-malt==2.15.3
+rustworkx==0.18.1
+scipy-openblas32==0.3.34.106.0
+termcolor==3.3.0
+tomlkit==0.15.1
+
+# NOTE on --require-hashes: not used. pip's hash mode requires every dependency in the
+# resolution to carry a hash, including the packages already present in the base image,
+# which would force reinstalling numpy/scipy/torch and defeat the purpose of pinning the
+# image by digest. The digest pins the base; exact `==` pins pin the additions.
