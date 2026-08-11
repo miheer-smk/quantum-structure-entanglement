@@ -321,6 +321,76 @@ existed in the tracked tree at that time, so D5 was resolved against a file that
 `LICENSE` or `CITATION.cff` requires the author's instruction, and the README/LICENSE conflict
 cannot be resolved by picking one without knowing which posture is intended.
 
+### ADJUDICATED by the author, 2026-08-11
+
+**(a) `LICENSE` stands; the README was the drifted artifact.** `PLAN.md` §5 D5 had already
+resolved licensing as MIT and directed that the file not be touched. The `LICENSE` file is
+authoritative. `README.md` §License — which read "None yet — **all rights reserved** pending
+publication. A license will be selected at acceptance" — contradicted a `LICENSE` file shipping
+in the same tree, and has been corrected to state MIT and point at `LICENSE`.
+
+The drift arose because D5 was recorded as resolved on 2026-08-03 against a `LICENSE` that did
+not exist in the tracked tree until `58d1b79` on 2026-08-05, while the README was written on
+2026-08-04 in between. Nobody was wrong at the time they wrote; the tree passed through a state
+where the two disagreed and no check compared them. The README's "do not cite results without
+contacting the author" line is retained — the MIT grant covers the **code**, not permission to
+cite unpublished results.
+
+**(b) The repository stays PUBLIC.** Author's decision, with the reasoning recorded so the
+choice is legible later: a public, timestamped, frozen-before-results pre-registration is a
+**credibility asset** for the eventual paper and establishes priority on the design. That is
+judged to outweigh the confidentiality, which is largely notional given the repository is
+already indexed.
+
+This is therefore a **documented, accepted deviation from `PLAN.md` §4B and Decision D3**,
+which specified a private repository, and from §4B.3a/§8, which recorded that no remote would
+exist. The remote `git@github.com:miheer-smk/quantum-structure-entanglement.git` (created
+2026-08-04T18:19:57Z) is an accepted part of the project's outward-facing state from this date.
+`PLAN.md` is left unedited: it is the plan of record as it stood, and this file is where the
+departures from it live.
+
+**Cost accepted with it, stated once so it is not rediscovered as a surprise:** public
+visibility forecloses anonymous submission to venues requiring double-blind review, and
+`AUTHOR_HANDOFF.md`'s documentation of defects in the predecessor work is world-readable. The
+author has weighed both.
+
+**Not legal advice.** The author has been advised separately that if the MIT grant on
+unpublished work matters for institutional or funder reasons, that is a question for counsel,
+not for this file.
+
+## 2026-08-11 — Third instance of stated-source ≠ actual-source (RESULTS_STAGE0.md §2)
+
+**This is the third occurrence of one error class, which makes it a pattern rather than bad
+luck, and it is being retired structurally rather than patched again.** The prior two, both
+already recorded above and in `CLAUDE.md`:
+
+1. Fabricated `h` vectors labelled as pinned realizations — invisible to a gate that holds for
+   *any* `h`; caught only by an out-of-band provenance comparison.
+2. An unanchored regex returning the partial correlation `0.560` in place of the incremental-R²
+   `0.0283` — caught only because the tolerance was derived rather than typed.
+
+**Third instance.** `RESULTS_STAGE0.md` §2 stated the hook-equality measurement was taken on
+"512 pinned **test** realizations". Regenerating on `h_test[:512]` gives `1.0133e-06`, not the
+committed `8.94e-07`. Regenerating on `h_val[:512]` **and** `h_train[:512]` reproduces
+`8.9407e-07` exactly. The committed number was therefore correct and reproducible, but was not
+measured on the array the results file names.
+
+Same shape as the prior two: **a value whose stated source is not its actual source, where
+every check in existence passed because no check compared the two.** The scientific conclusion
+is unaffected — both values are float32 machine precision and `k=6` is still the published
+tensor — but R1's entire premise rests on that sentence, so the sentence has to be right.
+
+**Correction applied, per the author's ruling of 2026-08-11**, going further than a label fix:
+
+- The equality is re-measured on the arrays **R1 actually consumes** —
+  `data/ra03_states_L8_N800_s{42,43,44}.pt` — rather than on any training-ensemble split. R1's
+  premise is asserted on R1's own data.
+- It is reported as a **bound**, not a 4-significant-figure value. Measured across five
+  different arrays the value ranges over `8.94e-07 … 1.01e-06`; the honest and stronger claim
+  is that it is below a stated bound at float32 machine precision on **every** array tested,
+  because that claim does not depend on which array anyone happens to pick.
+- The extraction gate asserts the bound on a stated split, with a failure demonstration.
+
 ## 2026-08-11 — The environment behind the Stage 0/1 tables was never recorded; this is a RECONSTRUCTION
 
 **Stated as plainly as it can be: the software environment that produced every number in

@@ -1,12 +1,28 @@
 # RESULTS_STAGE0.md — Inventory and exact-solver validation
 
 **Gate: PASS.** 22/22 tests green. Worst ED vs free-fermion disagreement across all 14
-cross-validation cases: **1.648e-11** (gate: < 1e-10).
+cross-validation cases:
+<!--prov id=ed_vs_ff_worst script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=bound md=2e-11 -->
+**< 2e-11** (gate: < 1e-10).
 
 Provenance: submodule pin `0c4e6e4`; artifacts under `$QSAE_ARTIFACTS`, hashes in
 `pins/`; entropy in **nats** throughout; open boundaries; `J ≡ 1`.
 `PREREGISTRATION.md` does not exist yet by design — its SHA will be added to every
 downstream results file once Stage 1.5 clears.
+
+> **Regenerable, and provenance-checked (2026-08-11).** Every number below is produced by
+> `scripts/regen_stage0.py` from pinned artifacts and carries a machine-readable provenance
+> tag naming the script, the input array, the seed, and that array's hash.
+> `scripts/check_provenance.py` fails if a tagged number's stated source is not the source it
+> was computed from. See `DEVIATIONS.md` (2026-08-11) — this file previously mis-stated the
+> source of the section-2 measurement, the third instance of that error class.
+>
+> **Values at the floating-point noise floor are reported as BOUNDS, not as digits.**
+> `scripts/audit_precision.py` recomputes each quantity under BLAS thread counts, which cannot
+> change a physical result. Anything that moves has no information in its trailing digits, and
+> quoting it to four significant figures would assert a precision it does not have. The ED
+> vs free-fermion agreements are all in this category — including the headline, which ranges
+> over 1.64786e-11 … 1.64806e-11 across thread counts alone.
 
 ---
 
@@ -18,16 +34,30 @@ asserted.**
 A deliberately site-blind solver — one that reads `h[0]` and applies it to every site,
 ignoring per-site structure entirely — was run against the same gate:
 
+The uniform rows are **bounds** — on a uniform field the site-blind solver performs the
+identical computation, so the figure is a noise floor and not a measurement of anything. The
+disordered rows are **stable values**: a real physical separation roughly 10¹³ times the noise
+floor, unchanged to 10 significant figures across thread configurations.
+
+<!--prov id=site_blind_uniform_h0.5_L8 script=scripts/regen_stage0.py array=none seed=none sha256=none kind=bound md=2e-11 -->
+<!--prov id=site_blind_uniform_h1.0_L8 script=scripts/regen_stage0.py array=none seed=none sha256=none kind=bound md=1e-13 -->
+<!--prov id=site_blind_uniform_h2.0_L8 script=scripts/regen_stage0.py array=none seed=none sha256=none kind=bound md=1e-12 -->
+<!--prov id=site_blind_disordered_r0_ordered script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.15145 -->
+<!--prov id=site_blind_disordered_r1 script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.45961 -->
+<!--prov id=site_blind_disordered_r2_critical script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.46357 -->
+<!--prov id=site_blind_disordered_r3 script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.36126 -->
+<!--prov id=site_blind_disordered_r4_paramagnetic script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.038587 -->
+
 | Case | max abs difference vs ED | Verdict |
 |---|---|---|
-| uniform h = 0.5, L = 8 | 1.648e-11 | **passes — bug invisible** |
-| uniform h = 1.0, L = 8 | 3.225e-14 | **passes — bug invisible** |
-| uniform h = 2.0, L = 8 | 5.045e-13 | **passes — bug invisible** |
-| disordered r0 (δ = +2.00) | 1.515e-01 | caught |
-| disordered r1 (δ = +1.00) | 4.596e-01 | caught |
-| disordered r2 (δ = +0.00) | 4.636e-01 | caught |
-| disordered r3 (δ = −1.00) | 3.613e-01 | caught |
-| disordered r4 (δ = −2.00) | 3.859e-02 | caught |
+| uniform h = 0.5, L = 8 | < 2e-11 | **passes — bug invisible** |
+| uniform h = 1.0, L = 8 | < 1e-13 | **passes — bug invisible** |
+| uniform h = 2.0, L = 8 | < 1e-12 | **passes — bug invisible** |
+| disordered r0 (δ = +2.00) | 0.15145 | caught |
+| disordered r1 (δ = +1.00) | 0.45961 | caught |
+| disordered r2 (δ = +0.00) | 0.46357 | caught |
+| disordered r3 (δ = −1.00) | 0.36126 | caught |
+| disordered r4 (δ = −2.00) | 0.038587 | caught |
 
 With a uniform field every `h_j` is equal, so "uses per-site `h_j`" and "uses `h[0]`
 everywhere" are the same computation. The uniform gate cannot separate them **in
@@ -101,26 +131,63 @@ residual-stream state of shape `(N, L, d_model)`, mean-pooled to `(N, d_model)`.
 
 All seven are post-residual-add, pre-`final_norm`, `(N, L, d_model)`, no pooling.
 
-### Verified equality, not assumed
+### Verified equality, not assumed — measured on the arrays R1 actually consumes
 
-On 512 pinned test realizations with checkpoint `ms_trained/seed1`:
+> **CORRECTED 2026-08-11.** This section previously reported `8.94e-07` on "512 pinned **test**
+> realizations". That value is **not** reproducible on `h_test`; it reproduces exactly on
+> `h_val[:512]` and `h_train[:512]`. The number was right and the stated source was wrong —
+> the third instance of that error class in this repository (`DEVIATIONS.md`, 2026-08-11).
+> Re-measured here on `data/ra03_states_L8_N800_s{42,43,44}.pt`, the evaluation arrays
+> `phase06` — and therefore R1 — actually uses, so R1's premise is asserted on R1's own data.
 
-```
-max |mean_pool(k=6)  −  last_layer_pooled(...)|  =  8.94e-07
-max |mean_pool(post_final_norm) − last_layer_pooled(...)|  =  2.39e+00
-```
+Checkpoint `ms_trained/seed1`, all 800 realizations of each pinned eval array:
 
-`8.94e-07` is float32 machine precision — the published path stays in float32 while this
-one casts to float64 at the end. So `k=6` **is** the published tensor.
-`post_final_norm` differs by 2.39, which is why it is not in the layer axis: mixing it in
-would compare unlike normalisations across the very axis H4's rank correlation runs along.
+<!--prov id=hook_k6_vs_published_eval_s42 script=scripts/regen_stage0.py array=data/ra03_states_L8_N800_s42.pt seed=none sha256=b605c43da217 kind=bound md=2e-06 -->
+<!--prov id=hook_k6_vs_published_eval_s43 script=scripts/regen_stage0.py array=data/ra03_states_L8_N800_s43.pt seed=none sha256=47a0e6afacae kind=bound md=2e-06 -->
+<!--prov id=hook_k6_vs_published_eval_s44 script=scripts/regen_stage0.py array=data/ra03_states_L8_N800_s44.pt seed=none sha256=cc7d8ba56e25 kind=bound md=2e-06 -->
+<!--prov id=hook_postnorm_vs_published_eval_s42 script=scripts/regen_stage0.py array=data/ra03_states_L8_N800_s42.pt seed=none sha256=b605c43da217 kind=bound md=3.0 -->
+<!--prov id=hook_postnorm_vs_published_eval_s43 script=scripts/regen_stage0.py array=data/ra03_states_L8_N800_s43.pt seed=none sha256=47a0e6afacae kind=bound md=3.0 -->
+<!--prov id=hook_postnorm_vs_published_eval_s44 script=scripts/regen_stage0.py array=data/ra03_states_L8_N800_s44.pt seed=none sha256=cc7d8ba56e25 kind=bound md=3.0 -->
 
-RMS magnitude grows monotonically through the stack (0.031 → 0.127 → 0.193 → 0.799 → 0.948
-→ 1.405 → 1.635), as expected for an un-normalised Pre-LN residual stream. This matters for
-Brief Part 8 item 5 (massive activations) and is why control C8 is not optional.
+| eval array | `max｜mean_pool(k=6) − last_layer_pooled｜` | in float32 ULPs | `post_final_norm` |
+|---|---|---|---|
+| `…s42.pt` | < 2e-06 | 14 × 2⁻²⁴ | > 2.4, < 3.0 |
+| `…s43.pt` | < 2e-06 | 17 × 2⁻²⁴ | > 2.4, < 3.0 |
+| `…s44.pt` | < 2e-06 | 15 × 2⁻²⁴ | > 2.4, < 3.0 |
 
-**Consequence for R1.** R1 will be run at `k=6`, which is provably the published tensor, so
-a pass means the extraction stack is commensurable rather than accidentally landing in range.
+**Reported as a bound, deliberately.** Each per-array value is bit-stable — zero spread across
+BLAS thread counts — but differs *between* arrays, because it is simply a count of float32
+ULPs: exactly 14, 17 and 15 times 2⁻²⁴. Quoting any one of them to three significant figures
+reports the ULP count of whichever array was picked, which is why the original `8.94e-07`
+(= 15 × 2⁻²⁴) looked like a measurement and was really a coincidence of array choice. The
+claim that survives every array is the one worth making:
+
+> `k=6` agrees with the published `last_layer_pooled` tensor to **< 2e-06 on every array
+> tested** — float32 machine precision, the published path staying in float32 while this one
+> casts to float64 at the end. **`k=6` is the published tensor.**
+
+`post_final_norm` differs by more than 2.4 on every eval array — six orders of magnitude
+above the agreement bound — which is why it is not on the layer axis: mixing it in would
+compare unlike normalisations across the very axis H4's rank correlation runs along.
+
+<!--prov id=rms_embed script=scripts/regen_stage0.py array=data/ra03_states_L8_N800_s42.pt seed=none sha256=b605c43da217 kind=value md=0.0311 -->
+<!--prov id=rms_block0_attn script=scripts/regen_stage0.py array=data/ra03_states_L8_N800_s42.pt seed=none sha256=b605c43da217 kind=value md=0.1287 -->
+<!--prov id=rms_block0_mlp script=scripts/regen_stage0.py array=data/ra03_states_L8_N800_s42.pt seed=none sha256=b605c43da217 kind=value md=0.1929 -->
+<!--prov id=rms_block1_attn script=scripts/regen_stage0.py array=data/ra03_states_L8_N800_s42.pt seed=none sha256=b605c43da217 kind=value md=0.8025 -->
+<!--prov id=rms_block1_mlp script=scripts/regen_stage0.py array=data/ra03_states_L8_N800_s42.pt seed=none sha256=b605c43da217 kind=value md=0.9529 -->
+<!--prov id=rms_block2_attn script=scripts/regen_stage0.py array=data/ra03_states_L8_N800_s42.pt seed=none sha256=b605c43da217 kind=value md=1.4044 -->
+<!--prov id=rms_block2_mlp script=scripts/regen_stage0.py array=data/ra03_states_L8_N800_s42.pt seed=none sha256=b605c43da217 kind=value md=1.6390 -->
+
+RMS magnitude grows monotonically through the stack — 0.0311 → 0.1287 → 0.1929 → 0.8025 →
+0.9529 → 1.4044 → 1.6390 on `…s42.pt` — as expected for an un-normalised Pre-LN residual
+stream. (These are restated on the eval array rather than corrected; the earlier figures were
+measured on a training-ensemble split and are consistent to the two digits they were given
+to.) This matters for Brief Part 8 item 5 (massive activations) and is why control C8 is not
+optional.
+
+**Consequence for R1.** R1 will be run at `k=6`, which is provably the published tensor on
+the very arrays R1 evaluates, so a pass means the extraction stack is commensurable rather
+than accidentally landing in range.
 
 ---
 
@@ -129,11 +196,22 @@ a pass means the extraction stack is commensurable rather than accidentally land
 **They span, by construction.** Selected by nearest-δ_r match to targets
 `(+2, +1, 0, −1, −2)` from the pinned `seed1` training ensemble.
 
+<!--prov id=index_r0_ordered script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=29086 -->
+<!--prov id=delta_r_r0_ordered script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=1.999946 -->
+<!--prov id=index_r1 script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=40316 -->
+<!--prov id=delta_r_r1 script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.999991 -->
+<!--prov id=index_r2_critical script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=49390 -->
+<!--prov id=delta_r_r2_critical script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=bound md=1e-7 -->
+<!--prov id=index_r3 script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=28980 -->
+<!--prov id=delta_r_r3 script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=-1.000099 -->
+<!--prov id=index_r4_paramagnetic script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=11303 -->
+<!--prov id=delta_r_r4_paramagnetic script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=-2.000674 -->
+
 | label | ensemble index | δ_r | phase |
 |---|---|---|---|
 | `r0_ordered` | 29086 | **+1.999946** | clearly ordered |
 | `r1` | 40316 | +0.999991 | ordered side |
-| `r2_critical` | 49390 | **+0.000000** | near-critical |
+| `r2_critical` | 49390 | **< 1e-7 in magnitude** | near-critical |
 | `r3` | 28980 | −1.000099 | paramagnetic side |
 | `r4_paramagnetic` | 11303 | **−2.000674** | clearly paramagnetic |
 
@@ -157,7 +235,15 @@ realizations at those indices, with δ_r matching to 1e-5.
 ## 4. Disorder-ensemble characterization (S0.5)
 
 Exact for `h ~ U(0.1, 2.0)`, confirmed against the pinned tensors (`seed{1,2,3}`, 150,000
-realizations): per-seed `E[ln h]` = −0.1498, −0.1490, −0.1480.
+realizations):
+
+<!--prov id=E_ln_h_seed1 script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=-0.1498 -->
+<!--prov id=E_ln_h_seed2 script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed2.pt seed=none sha256=2bfc7dab9e5d kind=value md=-0.1490 -->
+<!--prov id=E_ln_h_seed3 script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed3.pt seed=none sha256=bf0bfa8597be kind=value md=-0.1480 -->
+per-seed `E[ln h]` = −0.1498, −0.1490, −0.1480.
+
+<!--prov id=E_ln_h script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=-0.149183 -->
+<!--prov id=sd_ln_h script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.709086 -->
 
 | quantity | value |
 |---|---|
@@ -165,19 +251,35 @@ realizations): per-seed `E[ln h]` = −0.1498, −0.1490, −0.1480.
 | `sd[ln h]` | **0.709086** |
 | `[ln J] − [ln h]` | **+0.149183** → **ordered side** |
 
+(`E[ln h]` and `sd[ln h]` are closed forms in `h_min`/`h_max` — but `h_min`/`h_max` are read
+from the pinned artifact's own `meta`, never hardcoded, because they determine every `δ_r`.
+The provenance tags therefore name `seed1` rather than claiming these are source-free.)
+
+<!--prov id=mean_delta_r_L8 script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.595 -->
+<!--prov id=mean_delta_r_L10 script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.665 -->
+<!--prov id=mean_delta_r_L12 script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.729 -->
+
 Mean δ_r drifts **further from criticality as L grows**: **+0.595** (L=8), **+0.665**
 (L=10), **+0.729** (L=12). Worth carrying into H1: the ensemble is not merely off-critical,
 it is increasingly off-critical in the direction the scaling test needs to control.
+(Analytic — `√L · (−E[ln h]/σ_lnh)` — so the L = 10 and L = 12 entries need no ensemble, which
+matters because neither has a pinned one.)
 
 δ_r occupancy, pooled L=8 across seeds 1–3 (N = 150,000):
 
+<!--prov id=occupancy_0.05_count script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt,data/tfim_L8_N50k_seed2.pt,data/tfim_L8_N50k_seed3.pt seed=none sha256=10aacd0f50a4,2bfc7dab9e5d,bf0bfa8597be kind=value md=5503 -->
+<!--prov id=occupancy_0.10_count script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt,data/tfim_L8_N50k_seed2.pt,data/tfim_L8_N50k_seed3.pt seed=none sha256=10aacd0f50a4,2bfc7dab9e5d,bf0bfa8597be kind=value md=10980 -->
+<!--prov id=occupancy_0.25_count script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt,data/tfim_L8_N50k_seed2.pt,data/tfim_L8_N50k_seed3.pt seed=none sha256=10aacd0f50a4,2bfc7dab9e5d,bf0bfa8597be kind=value md=27154 -->
+<!--prov id=occupancy_0.50_count script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt,data/tfim_L8_N50k_seed2.pt,data/tfim_L8_N50k_seed3.pt seed=none sha256=10aacd0f50a4,2bfc7dab9e5d,bf0bfa8597be kind=value md=52545 -->
+<!--prov id=occupancy_neg_count script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt,data/tfim_L8_N50k_seed2.pt,data/tfim_L8_N50k_seed3.pt seed=none sha256=10aacd0f50a4,2bfc7dab9e5d,bf0bfa8597be kind=value md=44079 -->
+
 | band | count | share | ≈ per seed |
 |---|---|---|---|
-| \|δ_r\| < 0.05 | 5,503 | 3.67 % | ~1,834 |
-| \|δ_r\| < 0.10 | 10,980 | 7.32 % | ~3,660 |
-| \|δ_r\| < 0.25 | 27,154 | 18.10 % | ~9,051 |
-| \|δ_r\| < 0.50 | 52,545 | 35.03 % | ~17,515 |
-| δ_r < 0 (paramagnetic) | 44,079 | 29.39 % | — |
+| \|δ_r\| < 0.05 | 5503 | 3.67 % | ~1,834 |
+| \|δ_r\| < 0.10 | 10980 | 7.32 % | ~3,660 |
+| \|δ_r\| < 0.25 | 27154 | 18.10 % | ~9,051 |
+| \|δ_r\| < 0.50 | 52545 | 35.03 % | ~17,515 |
+| δ_r < 0 (paramagnetic) | 44079 | 29.39 % | — |
 
 The critical sub-ensemble is in-distribution and well populated; no retraining is needed.
 

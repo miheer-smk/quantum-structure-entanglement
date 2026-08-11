@@ -239,5 +239,9 @@ repository without contacting the author.
 
 ## License
 
-None yet — **all rights reserved** pending publication. A license will be selected at
-acceptance rather than chosen by default.
+**MIT** — see `LICENSE`. Resolved in `PLAN.md` §5 D5; this section previously read "none yet,
+all rights reserved pending publication", which contradicted the `LICENSE` file shipped in the
+same tree. The `LICENSE` file is authoritative and the drift is recorded in `DEVIATIONS.md`.
+
+The MIT grant covers the **code**. It is not an invitation to cite unpublished results: see
+the Citation section above, and contact the author before citing anything from this repository.
