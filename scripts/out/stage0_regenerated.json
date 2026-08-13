@@ -13,13 +13,13 @@
     "hostname_class": "linux-aarch64-20core",
     "numpy": "2.1.0",
     "python": "3.12.3",
-    "repo_git_sha": "a89e76321a4bcedbb573a55668693ea7294f1b6b",
+    "repo_git_sha": "de203f0153532beb42556ceffee08bfa867fa378",
     "repo_working_tree_dirty": true,
     "rng_seeds": {},
     "slurm_job_id": null,
     "submodule_sha": "0c4e6e4a8a0fb68aec6820eea8c7eed49d05a539",
     "torch": "2.13.0a0+8145d630e8.nv26.06",
-    "wall_clock_utc": "2026-08-11T19:22:41Z"
+    "wall_clock_utc": "2026-08-13T14:09:27Z"
   },
   "claims": {
     "E_ln_h": {
@@ -106,7 +106,7 @@
     "ed_vs_ff_worst": {
       "array": "data/tfim_L8_N50k_seed1.pt",
       "id": "ed_vs_ff_worst",
-      "kind": "bound",
+      "kind": "value",
       "script": "scripts/regen_stage0.py",
       "seed": "none",
       "sha256": "10aacd0f50a4d16f8c3b1fc66bd8c4ddac6e5e8ac12c75b144306f16e5bec9f4",
@@ -403,7 +403,7 @@
     "site_blind_uniform_h0.5_L8": {
       "array": "none",
       "id": "site_blind_uniform_h0.5_L8",
-      "kind": "bound",
+      "kind": "value",
       "script": "scripts/regen_stage0.py",
       "seed": "none",
       "sha256": "none",
@@ -421,7 +421,7 @@
     "site_blind_uniform_h2.0_L8": {
       "array": "none",
       "id": "site_blind_uniform_h2.0_L8",
-      "kind": "bound",
+      "kind": "value",
       "script": "scripts/regen_stage0.py",
       "seed": "none",
       "sha256": "none",

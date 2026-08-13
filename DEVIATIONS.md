@@ -478,3 +478,77 @@ strictly more than the deleted tool did.
 Nothing is lost by the deletion: every quantity `diff_stage0.py` compared is now a registered
 claim with a tag, and the gate runs in the suite (`tests/test_provenance_gate.py`) rather than
 by hand.
+
+## 2026-08-13 — The precision rule was wrong, and the author corrected it
+
+**A wrong adjudication by the author, recorded here because that is what this file is for.**
+The ruling of 2026-08-11 directed that near-machine-precision values be restated as bounds,
+with the operative test being *does the value move under BLAS thread count*. The author
+withdrew that rule on 2026-08-13 as too crude and issued the corrected one below. The
+assistant implemented the original rule as given; the defect is in the rule, not in its
+execution, and the correction is the author's.
+
+### What the withdrawn rule got wrong
+
+*Moves at all → BOUND* is a binary test applied to a continuous quantity, so it returned the
+same verdict for two situations that are not alike:
+
+| Quantity | Spread across thread counts | What the withdrawn rule said | What is true |
+|---|---|---|---|
+| `ed_vs_ff_worst` | 2.0e-15 abs, **1.2e-04** rel | BOUND — no quotable digits | identical in its first **4** figures in every configuration; wobbles in the 5th |
+| `ceff_mirror_dc` | 1.1e-15 abs, **8.3e-01** rel | BOUND — no quotable digits | does not reproduce even its **first** figure |
+
+Collapsing those into one word discarded honestly measured precision from the figure that
+carries the **entire two-solver ground-truth claim**. Under-claiming is not automatically the
+safe direction: a bound where a value exists throws away evidence, and it makes the repository
+look less reproducible than it measurably is.
+
+### The corrected rule (author, 2026-08-13)
+
+> Report to the number of significant figures that are **stable across configurations**, and
+> state the measured spread alongside.
+
+Implemented in `scripts/audit_precision.py` as a `stable_sigfigs` column: each configuration's
+value is rounded to *k* significant figures and *k* is increased until the configurations
+disagree. Below **two** stable figures the quantity is still reported as a bound, because one
+stable digit is an order-of-magnitude statement and an inequality says that more honestly.
+Claim kinds are **derived** from that output by `regen_stage0.audited_kind()`, never typed.
+
+### What the corrected rule changes, measured over 33 quantities at 1/2/4/8 threads
+
+- **`ed_vs_ff_worst` is restored to `1.648e-11`** (spread 2.0e-15), 4 stable figures, in the
+  `RESULTS_STAGE0.md` header and as a `kind=value` claim. It was `< 2e-11`.
+- The uniform site-blind rows split rather than sharing one verdict: `h=0.5` → `1.648e-11`
+  (4 s.f.), `h=2.0` → `4.9e-13` (2 s.f.), `h=1.0` stays a bound at 1 stable figure.
+- 25 of 33 quantities are values, 8 are bounds. Under the withdrawn rule, 14 of the 14
+  ED-vs-free-fermion agreements were bounds; now 6 of them are.
+- Nothing about §2 changes. `hook_k6_vs_published_eval_s*` is bit-stable across thread counts
+  yet stays a bound, because its binding axis is **which array is chosen** (14/17/15 float32
+  ULPs), an axis the thread audit does not sweep. That distinction is now carried in the audit
+  output as `other_axis_caveat`, so `verdict: value` there cannot be misread as clearance to
+  quote digits the quantity does not have.
+
+### Two things measured on the way that were not known before
+
+1. **The uniform site-blind rows are bit-identical to the ED-vs-free-fermion cross-validation
+   rows** at the same `(L = 8, h)`. §1 argued on paper that the site-blind solver performs the
+   identical computation on a uniform field; the audit now measures it, through the two
+   separate code paths. The degeneracy finding is stronger for it.
+2. **A figure's reproducibility and its meaning are independent.** `site_blind_uniform_h0.5_L8`
+   reproduces to 4 significant figures and still detects nothing whatsoever about
+   site-blindness. The corrected rule governs how many digits may be printed; it says nothing
+   about whether the quantity is evidence for anything, and `RESULTS_STAGE0.md` §1 now states
+   that adjacent to the table so a reader cannot borrow precision as significance.
+
+### Limitation, stated so it is not overread
+
+BLAS thread count is **one** reconfiguration axis — the one that can be varied on this machine.
+`stable_sigfigs` is therefore an **upper** bound on the digits worth quoting, not a claim of
+bitwise portability across BLAS implementations, CPU architectures or compilers. Recorded in
+`scripts/audit_precision.py` alongside the rule.
+
+**Standing-rule compliance.** `tests/test_precision_bounds.py` asserts the rule in **both**
+directions: the headline IS stable at 4 figures, it is NOT stable at 5 (so the results file
+cannot quietly grow a digit), a noise-dominated quantity has fewer than 2 stable figures (so
+"bound" cannot become a blanket excuse), and a genuinely physical quantity is stable far beyond
+any quoted precision (the control).

@@ -30,10 +30,19 @@ independently of the prose.
 
 KINDS
 -----
-`value` -- a stable quantity; compared at the precision the markdown states it to.
-`bound`  -- a quantity at the floating-point noise floor whose trailing digits carry no
-            information (see scripts/audit_precision.py). The markdown states an inequality
-            and the harness asserts the inequality, never the digits.
+`value` -- quoted to the number of significant figures `scripts/audit_precision.py` measures
+           to be STABLE across configurations, with the spread stated alongside. The harness
+           compares at exactly the precision the markdown states, so quoting fewer figures is
+           always safe and quoting more is a gate failure waiting to happen.
+`bound`  -- fewer than two stable significant figures, so the digits are an order-of-magnitude
+            statement at best. The markdown states an inequality and the harness asserts the
+            inequality, never the digits.
+
+The rule that assigns these was corrected by the author on 2026-08-13; the earlier version
+("moves at all under reconfiguration -> bound") is recorded in DEVIATIONS.md along with what
+it cost. Kinds are DERIVED from the audit output by `regen_stage0.audited_kind`, never typed:
+a hand-typed "this one is stable to 4 figures" would be a measured constant inlined as a
+literal, which is the error class this whole mechanism exists to retire.
 """
 
 from __future__ import annotations

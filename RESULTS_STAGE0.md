@@ -2,8 +2,8 @@
 
 **Gate: PASS.** 22/22 tests green. Worst ED vs free-fermion disagreement across all 14
 cross-validation cases:
-<!--prov id=ed_vs_ff_worst script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=bound md=2e-11 -->
-**< 2e-11** (gate: < 1e-10).
+<!--prov id=ed_vs_ff_worst script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=1.648e-11 -->
+**1.648e-11**, spread **2.0e-15** across BLAS thread counts (gate: < 1e-10).
 
 Provenance: submodule pin `0c4e6e4`; artifacts under `$QSAE_ARTIFACTS`, hashes in
 `pins/`; entropy in **nats** throughout; open boundaries; `J ≡ 1`.
@@ -17,12 +17,20 @@ downstream results file once Stage 1.5 clears.
 > was computed from. See `DEVIATIONS.md` (2026-08-11) — this file previously mis-stated the
 > source of the section-2 measurement, the third instance of that error class.
 >
-> **Values at the floating-point noise floor are reported as BOUNDS, not as digits.**
-> `scripts/audit_precision.py` recomputes each quantity under BLAS thread counts, which cannot
-> change a physical result. Anything that moves has no information in its trailing digits, and
-> quoting it to four significant figures would assert a precision it does not have. The ED
-> vs free-fermion agreements are all in this category — including the headline, which ranges
-> over 1.64786e-11 … 1.64806e-11 across thread counts alone.
+> **Every value is quoted to the number of significant figures measured to be stable, with
+> its spread.** `scripts/audit_precision.py` recomputes each quantity under BLAS thread
+> counts — which cannot change a physical result — and counts how far down the digits agree.
+> A quantity is quoted to exactly that many figures and never more; below two stable figures
+> it is stated as a bound instead, because one stable digit is an order-of-magnitude claim and
+> an inequality makes that claim more honestly.
+>
+> **Rule corrected by the author on 2026-08-13** (`DEVIATIONS.md`). The previous rule —
+> *moves at all under thread count → bound* — was too crude, and this file was the evidence:
+> it filed the headline agreement, whose leading four digits are identical in every
+> configuration, under the same verdict as `|Δc_eff|` under mirroring, which does not
+> reproduce its first digit. That discarded honestly measured precision from the number
+> carrying the two-solver ground-truth claim. The headline is restored to **1.648e-11**, at
+> the four figures it actually has.
 
 ---
 
@@ -34,30 +42,39 @@ asserted.**
 A deliberately site-blind solver — one that reads `h[0]` and applies it to every site,
 ignoring per-site structure entirely — was run against the same gate:
 
-The uniform rows are **bounds** — on a uniform field the site-blind solver performs the
-identical computation, so the figure is a noise floor and not a measurement of anything. The
-disordered rows are **stable values**: a real physical separation roughly 10¹³ times the noise
-floor, unchanged to 10 significant figures across thread configurations.
+On a uniform field the site-blind solver performs the **identical computation**, so these rows
+detect nothing about site-blindness. That is section 1's finding, and it is now measured rather
+than argued: each uniform row below is **bit-identical** to the ED-vs-free-fermion
+cross-validation case at the same `(L = 8, h)` — same number, arrived at by a second code path.
 
-<!--prov id=site_blind_uniform_h0.5_L8 script=scripts/regen_stage0.py array=none seed=none sha256=none kind=bound md=2e-11 -->
+Their *reproducibility* is a separate question from their *meaning*, and the corrected
+precision rule answers only the first: `h = 0.5` is stable to four significant figures and
+`h = 2.0` to two, so both are quoted as values; `h = 1.0` is stable to one and stays a bound.
+**A figure that reproduces is not thereby a measurement of anything** — all three remain
+evidence of degeneracy, not of detection.
+
+The disordered rows are values in both senses: a real physical separation roughly 10¹³ times
+the noise floor, stable to 11–14 significant figures, quoted here to five.
+
+<!--prov id=site_blind_uniform_h0.5_L8 script=scripts/regen_stage0.py array=none seed=none sha256=none kind=value md=1.648e-11 -->
 <!--prov id=site_blind_uniform_h1.0_L8 script=scripts/regen_stage0.py array=none seed=none sha256=none kind=bound md=1e-13 -->
-<!--prov id=site_blind_uniform_h2.0_L8 script=scripts/regen_stage0.py array=none seed=none sha256=none kind=bound md=1e-12 -->
+<!--prov id=site_blind_uniform_h2.0_L8 script=scripts/regen_stage0.py array=none seed=none sha256=none kind=value md=4.9e-13 -->
 <!--prov id=site_blind_disordered_r0_ordered script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.15145 -->
 <!--prov id=site_blind_disordered_r1 script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.45961 -->
 <!--prov id=site_blind_disordered_r2_critical script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.46357 -->
 <!--prov id=site_blind_disordered_r3 script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.36126 -->
 <!--prov id=site_blind_disordered_r4_paramagnetic script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.038587 -->
 
-| Case | max abs difference vs ED | Verdict |
-|---|---|---|
-| uniform h = 0.5, L = 8 | < 2e-11 | **passes — bug invisible** |
-| uniform h = 1.0, L = 8 | < 1e-13 | **passes — bug invisible** |
-| uniform h = 2.0, L = 8 | < 1e-12 | **passes — bug invisible** |
-| disordered r0 (δ = +2.00) | 0.15145 | caught |
-| disordered r1 (δ = +1.00) | 0.45961 | caught |
-| disordered r2 (δ = +0.00) | 0.46357 | caught |
-| disordered r3 (δ = −1.00) | 0.36126 | caught |
-| disordered r4 (δ = −2.00) | 0.038587 | caught |
+| Case | max abs difference vs ED | stable s.f. (spread) | Verdict |
+|---|---|---|---|
+| uniform h = 0.5, L = 8 | 1.648e-11 | 4 (2.0e-15) | **passes — bug invisible** |
+| uniform h = 1.0, L = 8 | < 1e-13 | 1 (3.3e-15) | **passes — bug invisible** |
+| uniform h = 2.0, L = 8 | 4.9e-13 | 2 (1.7e-15) | **passes — bug invisible** |
+| disordered r0 (δ = +2.00) | 0.15145 | 13 (2.5e-15) | caught |
+| disordered r1 (δ = +1.00) | 0.45961 | 14 (5.0e-16) | caught |
+| disordered r2 (δ = +0.00) | 0.46357 | 11 (6.9e-15) | caught |
+| disordered r3 (δ = −1.00) | 0.36126 | 14 (4.5e-15) | caught |
+| disordered r4 (δ = −2.00) | 0.038587 | 13 (4.7e-15) | caught |
 
 With a uniform field every `h_j` is equal, so "uses per-site `h_j`" and "uses `h[0]`
 everywhere" are the same computation. The uniform gate cannot separate them **in
@@ -155,7 +172,9 @@ Checkpoint `ms_trained/seed1`, all 800 realizations of each pinned eval array:
 | `…s43.pt` | < 2e-06 | 17 × 2⁻²⁴ | > 2.4, < 3.0 |
 | `…s44.pt` | < 2e-06 | 15 × 2⁻²⁴ | > 2.4, < 3.0 |
 
-**Reported as a bound, deliberately.** Each per-array value is bit-stable — zero spread across
+**Reported as a bound, deliberately — and the corrected precision rule does not change that.**
+The rule quotes the figures that survive reconfiguration, and here the binding axis is not the
+one the thread-count audit sweeps: each per-array value is bit-stable — zero spread across
 BLAS thread counts — but differs *between* arrays, because it is simply a count of float32
 ULPs: exactly 14, 17 and 15 times 2⁻²⁴. Quoting any one of them to three significant figures
 reports the ULP count of whichever array was picked, which is why the original `8.94e-07`

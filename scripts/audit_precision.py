@@ -1,5 +1,5 @@
 """
-Audit which committed near-machine-precision values are STABLE VALUES and which are BOUNDS.
+Audit how many significant figures of each near-precision value survive reconfiguration.
 
 Motivation, author-directed 2026-08-11. Three of the repository's committed numbers sit at
 or near the floating-point noise floor. A harness that only checks "does the number match"
@@ -8,9 +8,40 @@ ED-vs-free-fermion agreement, which the entire two-solver ground-truth claim res
 that category.
 
 Method: recompute each quantity under configurations that MUST NOT change a physical result
--- BLAS thread count -- and report the spread. A quantity whose value moves under thread
-count carries no information in its trailing digits and must be reported as a bound. One
-whose value does not move is a stable value and may be quoted.
+-- BLAS thread count -- and measure how far down the digits agree.
+
+THE RULE, AND ITS CORRECTION (author, 2026-08-13)
+------------------------------------------------
+The rule this file first implemented was **"moves under thread count -> BOUND"**. The author
+withdrew it as too crude, and it is easy to see why from its own output: it returned the same
+verdict for `ed_vs_ff_worst`, whose four leading digits are identical across every
+configuration and which wobbles only in the fifth, and for `ceff_mirror_dc`, which does not
+reproduce even its first digit. Collapsing those into one word discards honestly measured
+precision from the claim carrying the entire two-solver ground truth.
+
+The rule now is: **report to the number of significant figures that are stable across
+configurations, and state the measured spread alongside.** `stable_sigfigs` is computed by
+rounding every configuration's value to k significant figures and increasing k until the
+configurations disagree. A quantity is quotable at that many figures and no more:
+
+  * `stable_sigfigs >= MIN_SIGFIGS_TO_QUOTE` -> a VALUE, quoted to exactly that many figures
+    and never more, always accompanied by its spread;
+  * `stable_sigfigs <  MIN_SIGFIGS_TO_QUOTE` -> a BOUND, because a single stable digit is an
+    order-of-magnitude statement, which is what a bound already says.
+
+WHAT THIS AUDIT DOES *NOT* ESTABLISH
+------------------------------------
+BLAS thread count is ONE reconfiguration axis. Stability under it is necessary, not
+sufficient: a value stable here could still move under a different BLAS library, a different
+CPU architecture, or a compiler change. `stable_sigfigs` is therefore an UPPER bound on the
+digits worth quoting, established against the one axis that can be varied on this machine.
+It is not a claim of bitwise portability, and nothing downstream should read it as one.
+
+Separately: a quantity can be thread-stable and still not quotable, if it varies along an
+axis this audit does not sweep. `hook_k6_vs_published_eval_s*` is exactly that case -- each
+is bit-identical across thread counts, but the three arrays give 14, 17 and 15 float32 ULPs,
+so the value is a property of the array chosen. Those stay bounds in the results file for a
+reason this audit cannot see, and the `kind=bound` tag records it.
 
 BLAS thread count is fixed when the library loads, so each configuration runs in its own
 subprocess.
@@ -32,6 +63,39 @@ THREAD_CONFIGS = (1, 2, 4, 8)
 UNIFORM_L = (8, 10, 12)
 UNIFORM_H = (0.5, 1.0, 2.0)
 EVAL_SEEDS = (42, 43, 44)
+
+#: Fewer stable figures than this and the quantity is reported as a bound: one stable digit
+#: is an order-of-magnitude statement, which an inequality already makes more honestly.
+MIN_SIGFIGS_TO_QUOTE = 2
+MAX_SIGFIGS = 17                     # float64 round-trips at 17 significant decimal digits
+
+#: Quantities whose binding variation is along an axis this audit does not sweep. Recorded in
+#: the output so a reader cannot take `verdict: value` -- which here means only "thread-stable"
+#: -- as clearance to quote digits the quantity does not possess.
+AXIS_CAVEATS = {
+    "hook_k6_vs_published_eval_s": "bit-stable across threads, but varies ACROSS EVAL ARRAYS "
+                                   "(14/17/15 x 2^-24); the array choice, not the thread "
+                                   "count, is the binding axis. Reported as a bound.",
+    "hook_postnorm_vs_published_eval_s": "bit-stable across threads, but varies across eval "
+                                         "arrays; reported as an interval in the results file.",
+}
+
+
+def stable_sigfigs(values: list[float]) -> int:
+    """How many leading significant figures are identical across every configuration.
+
+    Rounds each value to k significant figures and increases k until the configurations
+    disagree, so the answer is the number of digits it is honest to print -- not an estimate
+    derived from the relative spread, which would blur across a rounding boundary.
+    """
+    if len(set(values)) == 1:
+        return MAX_SIGFIGS
+    n = 0
+    for k in range(1, MAX_SIGFIGS + 1):
+        if len({f"{v:.{k - 1}e}" for v in values}) != 1:
+            break
+        n = k
+    return n
 
 
 def _measure() -> dict[str, float]:
@@ -59,6 +123,23 @@ def _measure() -> dict[str, float]:
         out[f"ed_vs_ff_disordered_{label}"] = float(
             np.max(np.abs(entropy_profile_ed(J, h) - entropy_profile_free_fermion(J, h))))
     out["ed_vs_ff_worst"] = max(v for k, v in out.items() if k.startswith("ed_vs_ff_"))
+
+    # The site-blind control, audited through the site-blind path so that the quantity
+    # measured here is the one the claim names. On a UNIFORM field this is by construction
+    # the same expression as the ed_vs_ff row at the same (L=8, h) -- "uses h_j" and "uses
+    # h[0] everywhere" coincide -- which is section 1's whole point; on DISORDERED chains it
+    # is a real physical separation and its quoted digits need auditing like any other.
+    def _blind(J, h):
+        return entropy_profile_free_fermion(J, np.full(len(h), h[0]))
+
+    for hv in UNIFORM_H:
+        h, J = np.full(8, hv), np.ones(7)
+        out[f"site_blind_uniform_h{hv}_L8"] = float(
+            np.max(np.abs(entropy_profile_ed(J, h) - _blind(J, h))))
+    for label, i in zip(labels, idx):
+        h, J = h_train[i], np.ones(7)
+        out[f"site_blind_disordered_{label}"] = float(
+            np.max(np.abs(entropy_profile_ed(J, h) - _blind(J, h))))
 
     # --- Stage 0 section 2: hook equality, on the arrays R1 ACTUALLY CONSUMES --------------
     import torch
@@ -128,12 +209,18 @@ def main() -> None:
         vals = [per_config[c][k] for c in per_config]
         lo, hi = min(vals), max(vals)
         spread_rel = (hi - lo) / abs(hi) if hi != 0 else 0.0
-        # A quantity is a STABLE VALUE only if configurations that cannot matter physically
-        # leave it identical to well beyond the precision anyone would quote it at.
+        # Corrected rule (author, 2026-08-13): quote the figures that are stable, not a
+        # binary moved/did-not-move. The spread travels with the value; it is not optional.
+        sig = stable_sigfigs(vals)
         summary[k] = {
             "min": lo, "max": hi, "spread_abs": hi - lo, "spread_rel": spread_rel,
-            "verdict": "stable value" if spread_rel < 1e-12 else "BOUND",
+            "stable_sigfigs": sig,
+            "quotable": f"{hi:.{min(sig, MAX_SIGFIGS) - 1}e}" if sig else None,
+            "verdict": "value" if sig >= MIN_SIGFIGS_TO_QUOTE else "BOUND",
         }
+        for prefix, caveat in AXIS_CAVEATS.items():
+            if k.startswith(prefix):
+                summary[k]["other_axis_caveat"] = caveat
 
     payload = {
         "_provenance": provenance(
@@ -147,13 +234,18 @@ def main() -> None:
     path = write_json(payload, "precision_audit.json")
 
     w = max(len(k) for k in keys)
-    print(f"{'quantity'.ljust(w)}  {'min':>14}  {'max':>14}  {'rel spread':>11}  verdict")
-    print("-" * (w + 50))
-    for k in keys:
+    print(f"{'quantity'.ljust(w)}  {'max':>14}  {'spread_abs':>11}  {'spread_rel':>11}  "
+          f"{'s.f.':>4}  {'quotable':>14}  verdict")
+    print("-" * (w + 70))
+    for k in sorted(keys, key=lambda k: -summary[k]["max"]):
         s = summary[k]
-        print(f"{k.ljust(w)}  {s['min']:14.6e}  {s['max']:14.6e}  {s['spread_rel']:11.2e}  "
-              f"{s['verdict']}")
-    print(f"\nwrote {path}")
+        sig = "full" if s["stable_sigfigs"] == MAX_SIGFIGS else str(s["stable_sigfigs"])
+        print(f"{k.ljust(w)}  {s['max']:14.6e}  {s['spread_abs']:11.3e}  "
+              f"{s['spread_rel']:11.3e}  {sig:>4}  {str(s['quotable']):>14}  {s['verdict']}")
+    n_bound = sum(1 for k in keys if summary[k]["verdict"] == "BOUND")
+    print(f"\n{len(keys)} quantities: {len(keys) - n_bound} value, {n_bound} bound "
+          f"(rule: quote {MIN_SIGFIGS_TO_QUOTE}+ stable significant figures, else a bound)")
+    print(f"wrote {path}")
 
 
 if __name__ == "__main__":
