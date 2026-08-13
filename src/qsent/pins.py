@@ -170,6 +170,28 @@ _PUBLISHED = {
     "phase06_entropy_partial_r_sep_sd": (
         "results/phase06_multiseed_trained.md", "Partial correlation | poly2-h",
         r"\|\s*entropy\s*\|[^|]*\|[^|]*\|\s*([+-]\d+\.\d+)\s*\|"),
+
+    # --- the published trained range, quoted in AUTHOR_HANDOFF.md -----------------------
+    "phase06_lrzz_incr_r2_min": (
+        "results/phase06_multiseed_trained.md", "Incremental R² beyond poly2-h",
+        r"\|\s*long_range_zz\s*\|\s*0\.\d+±0\.\d+\s*\[(0\.\d+),"),
+    "phase06_lrzz_incr_r2_max": (
+        "results/phase06_multiseed_trained.md", "Incremental R² beyond poly2-h",
+        r"\|\s*long_range_zz\s*\|\s*0\.\d+±0\.\d+\s*\[0\.\d+,(0\.\d+)\]"),
+
+    # --- the two published numbers with no recoverable artifact (AUTHOR_HANDOFF.md) -----
+    # Both come from `results/legacy/`, which is inside the pinned submodule, so the
+    # QUOTATIONS are verifiable even though the checkpoints behind them are gone. Section
+    # anchors are the table caption, which is identical in both files -- the mislabelling
+    # recorded in AUTHOR_HANDOFF.md -- so the FILE is what separates them.
+    **{f"ra08_learned_gain_L{L}": (
+        "results/legacy/ra08_scaling.md", "| L | energy val R²",
+        rf"\|\s*{L}\s*\|[^|]*\|[^|]*\|[^|]*\|[^|]*\|[^|]*\|\s*([+-]\d+\.\d+)\s*\|")
+       for L in (8, 10, 12)},
+    **{f"ra09_learned_gain_L{L}": (
+        "results/legacy/ra09_mixedfield.md", "| L | energy val R²",
+        rf"\|\s*{L}\s*\|[^|]*\|[^|]*\|[^|]*\|[^|]*\|[^|]*\|\s*([+-]\d+\.\d+)\s*\|")
+       for L in (8, 10)},
 }
 
 

@@ -2,9 +2,52 @@
 
 **Entanglement structure of energy-predicting transformers on the disordered transverse-field Ising chain.**
 
-Status: **Stage 1 complete.** Apparatus and exact-physics reference measurements only —
-**no transformer results exist yet.** Stage 2 (the first measurement on trained models) has
-not been run. 57 tests passing.
+Status: **Stage 1.5 complete.** Apparatus, exact-physics reference measurements, and the
+reproduction gate that ties this arm's instrument to the published pipeline.
+
+---
+
+## Where this stands
+
+<!--prov id=ed_vs_ff_worst script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=1.648e-11 -->
+<!--prov id=ed_vs_ff_worst_spread_abs script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=2.0e-15 -->
+
+1. **Exact-physics ground truth is validated by two independent solvers.** Exact
+   diagonalization and a free-fermion (Peschel/Majorana) solver agree to **1.648e-11**
+   (spread **2.0e-15** across BLAS thread counts) over 14 cross-validation cases, against a
+   pre-set gate of `< 1e-10`.
+
+2. **The extraction instrument is verified bitwise.** The hand-written Pre-LN reconstruction
+   reproduces the model's actual forward output **exactly — a difference of 0.0 — at all seven
+   hook points**, checked against tensors captured from a real forward pass, and ships with
+   four demonstrated failure modes (a normalised hook, an off-by-one block, an off-by-one
+   point within a block, and the wrong end of the stack) that the same assertions reject.
+
+<!--prov id=r1_mean script=scripts/run_r1.py array=runs/ms_trained/seed1/best.pt,runs/ms_trained/seed2/best.pt,runs/ms_trained/seed3/best.pt,runs/ms_trained/seed4/best.pt,runs/ms_trained/seed5/best.pt,runs/ms_trained/seed6/best.pt,runs/ms_trained/seed7/best.pt,runs/ms_trained/seed8/best.pt,runs/ms_trained/seed9/best.pt,runs/ms_trained/seed10/best.pt,data/ra03_states_L8_N800_s42.pt,data/ra03_states_L8_N800_s43.pt,data/ra03_states_L8_N800_s44.pt seed=42 sha256=f1dcf0903f26,76e5f8533a9c,cbef74267f22,75a5f498ac63,0f0e3ef98eea,bcfdd3db0295,98d10b25bb0c,60510def1f28,4ff920bf3164,d65635e48f4e,b605c43da217,47a0e6afacae,cc7d8ba56e25 kind=value md=0.028338425896742396 -->
+<!--prov id=r1_n_seeds_within_tolerance script=scripts/run_r1.py array=runs/ms_trained/seed1/best.pt,runs/ms_trained/seed2/best.pt,runs/ms_trained/seed3/best.pt,runs/ms_trained/seed4/best.pt,runs/ms_trained/seed5/best.pt,runs/ms_trained/seed6/best.pt,runs/ms_trained/seed7/best.pt,runs/ms_trained/seed8/best.pt,runs/ms_trained/seed9/best.pt,runs/ms_trained/seed10/best.pt,data/ra03_states_L8_N800_s42.pt,data/ra03_states_L8_N800_s43.pt,data/ra03_states_L8_N800_s44.pt seed=42 sha256=f1dcf0903f26,76e5f8533a9c,cbef74267f22,75a5f498ac63,0f0e3ef98eea,bcfdd3db0295,98d10b25bb0c,60510def1f28,4ff920bf3164,d65635e48f4e,b605c43da217,47a0e6afacae,cc7d8ba56e25 kind=value md=10 -->
+
+3. **The R1 reproduction gate PASSED on pinned checkpoints.** Substituting this arm's
+   extraction stack for the published one and changing nothing else reproduces the published
+   `long_range_zz` incremental-R² result: 10-seed mean **0.028338425896742396** inside the
+   pre-registered `[0.0223, 0.0343]`, with all **10** of 10 seeds inside the per-seed
+   tolerance.
+   > **What R1 validates.** R1 validates **this arm's extraction stack** against a published
+   > **probe-gain** number on pinned checkpoints. **It does not validate anything about SAEs.**
+   > It says **nothing about entanglement**. (`PLAN.md` §3.6 A1, verbatim.)
+
+4. **The pre-registration is frozen and publicly timestamped.** `PREREGISTRATION.md` Part I —
+   the confirmatory/exploratory split, the measured `c_eff` bias decision, the H1 feasibility
+   result, the power analysis, and the null plan — is committed and public. Part II (Stage 2
+   endpoint definitions) is marked PENDING and will be fixed before Stage 2 runs.
+
+5. > ### THE ENTANGLEMENT MEASUREMENT HAS NOT BEEN MADE.
+   > **Stage 2 has not been run.** No model-side entanglement number exists anywhere in this
+   > repository. Everything above is apparatus, exact physics, and an instrument check. The
+   > question this arm exists to answer — whether the represented state's entanglement behaves
+   > as the physics predicts — is **open and untested**.
+
+151 tests passing; every numeric claim in the results files, the pre-registration, this README
+and `AUTHOR_HANDOFF.md` carries a machine-checked provenance tag.
 
 ---
 
@@ -37,8 +80,15 @@ configuration. That fact constrains the whole design (see *Method* below).
 
 ## Pre-registered hypotheses
 
+> ### Status: H1, H2, H3, H4, H5 — **NOT YET TESTED.**
+> **Stage 2 has not been run.** Every hypothesis below is stated as pre-registered, not as
+> examined. No result — positive, negative, or partial — exists for any of them. They are
+> listed in full detail because pre-registration requires it, and the detail must not be
+> mistaken for evidence.
+
 Confirmatory and exploratory hypotheses are separated **in advance**, not in a later
-limitations section. The full text lives in `PLAN.md` §3.55 and §3.6.
+limitations section. The full text lives in `PLAN.md` §3.55 and §3.6, and verbatim in
+`PREREGISTRATION.md`.
 
 ### Confirmatory — the spine
 
@@ -88,14 +138,27 @@ Everything below is a property of exact ground truth or of the estimators, estab
 
 ### Ground truth validated two independent ways
 
-Exact diagonalization vs the free-fermion (Peschel/Majorana) solver agree to
-**1.648 × 10⁻¹¹** across 14 cases — L = 8/10/12 at uniform `h ∈ {0.5, 1, 2}`, plus five
-disordered realizations chosen to span `δ_r` from clearly ordered to clearly paramagnetic.
+<!--prov id=ed_vs_ff_worst script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=1.648e-11 -->
+<!--prov id=ed_vs_ff_worst_spread_abs script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=2.0e-15 -->
+
+Exact diagonalization vs the free-fermion (Peschel/Majorana) solver agree to **1.648e-11**,
+spread **2.0e-15** across BLAS thread counts, over 14 cases — L = 8/10/12 at uniform
+`h ∈ {0.5, 1, 2}`, plus five disordered realizations chosen to span `δ_r` from clearly ordered
+to clearly paramagnetic.
+
+Quoted to four significant figures because four is what survives every thread configuration;
+the fifth does not. Values whose digits move are reported as bounds instead
+(`scripts/audit_precision.py`, `DEVIATIONS.md` 2026-08-13).
 
 ### The uniform-field tests are degenerate — proven, not assumed
 
+<!--prov id=site_blind_uniform_h0.5_L8 script=scripts/regen_stage0.py array=none seed=none sha256=none kind=value md=1.648e-11 -->
+<!--prov id=site_blind_uniform_h1.0_L8 script=scripts/regen_stage0.py array=none seed=none sha256=none kind=bound md=1e-13 -->
+<!--prov id=site_blind_disordered_r2_critical script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.46357 -->
+
 A deliberately **site-blind** solver (reads `h[0]`, applies it everywhere) passes *every*
-uniform-field test at 10⁻¹¹–10⁻¹⁴ and fails every disordered one. With a uniform field, "uses
+uniform-field test — **1.648e-11** at `h = 0.5`, below **1e-13** at `h = 1.0` — and fails
+every disordered one, by as much as **0.46357**. With a uniform field, "uses
 per-site `h_j`" and "uses `h[0]`" are the same computation, so the uniform gate cannot
 separate them *in principle*. The disordered cases are the load-bearing ones.
 
@@ -134,10 +197,25 @@ non-overlapping CIs. The control matters: a small `Q` alone could just mean coar
 
 The predecessor's published probe gain was measured on a hook at `encoder.layers[-1]`. Because
 `nn.TransformerEncoder` is built with no `norm=` argument, that tensor is the post-residual-add,
-**pre-`final_norm`** residual stream. This arm's hook `k=6` reproduces it to **8.94 × 10⁻⁷**
-(float32 machine precision). `post_final_norm` differs by 2.39 and is **excluded** from the
-layer axis — it is a different normalisation, and mixing it in would place unlike tensors on
-the axis a rank correlation runs along.
+**pre-`final_norm`** residual stream. This arm's hook `k=6` reproduces it to within a bound of
+
+<!--prov id=hook_k6_vs_published_eval_s42 script=scripts/regen_stage0.py array=data/ra03_states_L8_N800_s42.pt seed=none sha256=b605c43da217 kind=bound md=2e-06 -->
+<!--prov id=hook_k6_vs_published_eval_s43 script=scripts/regen_stage0.py array=data/ra03_states_L8_N800_s43.pt seed=none sha256=47a0e6afacae kind=bound md=2e-06 -->
+<!--prov id=hook_k6_vs_published_eval_s44 script=scripts/regen_stage0.py array=data/ra03_states_L8_N800_s44.pt seed=none sha256=cc7d8ba56e25 kind=bound md=2e-06 -->
+
+**< 2e-06** on every pinned eval array R1 consumes. Reported as a bound deliberately: the
+per-array values are exact integer multiples of `2⁻²⁴` — 14, 17 and 15 float32 ULPs — so any
+quoted figure reports *which array was picked* rather than a property of the extraction.
+
+<!--prov id=hook_postnorm_vs_published_eval_s42 script=scripts/regen_stage0.py array=data/ra03_states_L8_N800_s42.pt seed=none sha256=b605c43da217 kind=bound md=3.0 -->
+<!--prov id=hook_postnorm_vs_published_eval_s43 script=scripts/regen_stage0.py array=data/ra03_states_L8_N800_s43.pt seed=none sha256=47a0e6afacae kind=bound md=3.0 -->
+<!--prov id=hook_postnorm_vs_published_eval_s44 script=scripts/regen_stage0.py array=data/ra03_states_L8_N800_s44.pt seed=none sha256=cc7d8ba56e25 kind=bound md=3.0 -->
+
+`post_final_norm`, by contrast, differs from the published tensor by **more than 2.4 and
+less than 3.0** on every one of those arrays (measured 2.4008, 2.4058 and 2.4351) — six orders
+of magnitude above the agreement bound. It is **excluded** from the layer axis: it is a
+different normalisation, and mixing it in would place unlike tensors on the axis a rank
+correlation runs along.
 
 ---
 
@@ -169,7 +247,7 @@ cd quantum-structure-entanglement
 pip install -e . -e submodules/quantum-structure-sae
 
 cp .env.local.example .env.local     # then set QSAE_ARTIFACTS (outside both repos)
-OMP_NUM_THREADS=4 pytest -q          # 57 tests
+OMP_NUM_THREADS=4 pytest -q          # 151 tests
 ```
 
 > The suite does dense `eigvalsh` at L = 12 (4096×4096). Leave BLAS threads bounded and do
@@ -187,11 +265,14 @@ src/qsent/
   disorder.py       delta_r criticality parameter and stratification
   splits.py         realization- and field-value-disjointness, asserted at runtime
   pins.py           hash-verified artifact loading; published constants read, not typed
-tests/              57 tests, incl. falsifiability checks (see below)
+tests/              151 tests, incl. falsifiability checks (see below)
 pins/               content hashes + the cross-repo contract
+scripts/            regeneration, precision audit, provenance gate, R1 runner
+env/                digest-pinned image + lockfile for the analysis environment
+PREREGISTRATION.md  Part I, frozen and public; Part II pending before Stage 2
 PLAN.md             staged plan, pre-registration text, power analyses
 DEVIATIONS.md       every departure from the brief, dated, with reasons
-RESULTS_STAGE*.md   per-stage results
+RESULTS_STAGE*.md   per-stage results, incl. RESULTS_STAGE1_5.md (R1)
 AUTHOR_HANDOFF.md   what co-authors need to know
 ```
 
@@ -224,7 +305,7 @@ framings that are ruled out of all outputs.
 
 ## Honest limitations
 
-- **No model results yet.** Stage 2 has not run. Everything above is apparatus and exact physics.
+- **No entanglement result exists.** Stage 2 has not run. The one model-side number in the repository is R1's, which measures the *instrument* and not the physics.
 - **`c_eff` cannot identify a universality class at L ≤ 12** (measured above). Reported descriptively only.
 - **Depth is 3 blocks.** H3/H4 are exploratory by construction. At n = 7 hook points a Spearman test needs `ρ ≥ 0.786` for p < 0.05; at n = 3 or 4, significance is unreachable at any `ρ`. A null H4 at this n is **uninformative, not evidence of dissociation**.
 - **Only L = 8 has a pinned ensemble**, and no L = 10/12 checkpoints survive upstream. A claim-bearing cross-L result needs new pinned ensembles *and* new training.

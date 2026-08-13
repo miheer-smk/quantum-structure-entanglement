@@ -66,6 +66,16 @@ def audited_kind(name: str) -> str:
     return "value" if summary[name]["stable_sigfigs"] >= MIN_SIGFIGS_TO_QUOTE else "bound"
 
 
+def audited_spread(name: str) -> float:
+    """The measured spread across BLAS thread counts, read from the audit rather than typed."""
+    p = repo_root() / "scripts" / "out" / "precision_audit.json"
+    if not p.exists():
+        raise RuntimeError(
+            "scripts/out/precision_audit.json is absent; run scripts/audit_precision.py first. "
+            "A spread cannot be reported without having been measured.")
+    return float(json.loads(p.read_text())["summary"][name]["spread_abs"])
+
+
 def cross_validation(reg: Registry) -> dict:
     """The 14 cross-validation cases: 9 uniform (3 L x 3 h) + 5 spanning disordered.
 
@@ -103,6 +113,10 @@ def cross_validation(reg: Registry) -> dict:
     # 4 significant figures survive every thread configuration; the fifth does not. Quoted at
     # exactly that, never more, with the spread reported next to it.
     reg.add("ed_vs_ff_worst", worst, ENS1, kind=audited_kind("ed_vs_ff_worst"))
+    # Under the corrected precision rule the spread TRAVELS WITH the value -- every place that
+    # quotes 1.648e-11 also quotes 2.0e-15 -- so it is a claim in its own right rather than
+    # decoration, and is gated wherever the value is. Read from the audit, never typed.
+    reg.add("ed_vs_ff_worst_spread_abs", audited_spread("ed_vs_ff_worst"), ENS1)
     for label in LABELS:
         # The site-blind separation on DISORDERED chains is a real physical separation,
         # ~1e10 times the noise floor, stable to 11-14 significant figures.

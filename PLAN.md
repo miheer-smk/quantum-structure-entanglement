@@ -1019,7 +1019,7 @@ possible, but it changes the model, and Part 4 says that decision is yours. Note
 architecture represent the wavefunction") than Construction B ("is the wavefunction
 decodable from the energy-trained model").
 
-**D5 — RESOLVED by D1.** `LICENSE` (MIT, "Copyright (c) 2026 Miheer Kulkarni") and
+**D5 — RESOLVED by D1.** `LICENSE` (MIT, "Copyright (c) 2026 Miheer Satish Kulkarni") and
 `CITATION.cff` already name the sole author correctly. Nothing to change; I will not touch
 either. If you later want to drop to all-rights-reserved pre-acceptance per Brief 1.5, say
 so and I will, but I am not raising it again.

@@ -133,9 +133,49 @@ def test_documentation_of_the_tag_format_is_not_parsed_as_a_tag(tmp_path):
 @pytest.mark.skipif(not __import__("os").environ.get("QSAE_ARTIFACTS"),
                     reason="QSAE_ARTIFACTS not configured")
 def test_committed_results_files_pass_the_gate():
-    """Every tagged number in every RESULTS_*.md matches the source it names."""
+    """Every tagged number in every gated file matches the source it names."""
     try:
         load_claims()
     except RuntimeError as e:
         pytest.skip(str(e))
     assert check() == []
+
+
+# ---------------------------------------------------------------------------------------
+# The public face is under the same gate -- demonstrated, not asserted
+# ---------------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("filename", ["README.md", "AUTHOR_HANDOFF.md"])
+def test_gate_catches_a_mislabelled_source_in_the_public_files(tmp_path, filename):
+    """The section-2 defect, planted in the two files most readers will ever open.
+
+    Extending a gate to new files is worth nothing until it is shown to reject a wrong tag
+    IN those files, so this repeats the mislabelled-source demonstration with the document
+    named README.md and AUTHOR_HANDOFF.md rather than RESULTS_STAGEX.md.
+    """
+    p = tmp_path / filename
+    tag = GOOD_TAG.replace(f"array={ARRAY_A}", f"array={ARRAY_B}").replace(
+        f"sha256={SHA_A}", f"sha256={SHA_B}")
+    p.write_text(f"<!--prov {tag} -->\nthe value is 1.25 nats\n")
+
+    failures = check([p], _claim())
+    assert failures, f"gate did NOT catch a mislabelled source in {filename}"
+    assert any("MISLABELLED SOURCE" in f for f in failures), failures
+    assert any(filename in f for f in failures), (
+        f"the failure does not name {filename}, so a reader could not locate it: {failures}")
+
+
+def test_the_public_files_are_actually_in_the_gate_globs():
+    """Coverage must not regress silently.
+
+    The demonstration above proves the gate rejects a bad tag in a file NAMED README.md; this
+    proves the real README.md is among the files the gate walks. Both are needed: the first
+    without the second would be a gate aimed at nothing.
+    """
+    from check_provenance import RESULTS_GLOBS
+    from qsent.pins import repo_root
+
+    walked = {p.name for g in RESULTS_GLOBS for p in repo_root().glob(g)}
+    for required in ("README.md", "AUTHOR_HANDOFF.md", "PREREGISTRATION.md",
+                     "RESULTS_STAGE0.md", "RESULTS_STAGE1_5.md"):
+        assert required in walked, f"{required} is not covered by the provenance gate"

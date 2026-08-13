@@ -14,13 +14,13 @@
     "hostname_class": "linux-aarch64-20core",
     "numpy": "2.1.0",
     "python": "3.12.3",
-    "repo_git_sha": "80d223098a230359cb0ebca909beaa2b5cb75d8c",
-    "repo_working_tree_dirty": false,
+    "repo_git_sha": "8ba87fc51e3d03e180c189c3c9dd2954ef760e61",
+    "repo_working_tree_dirty": true,
     "rng_seeds": {},
     "slurm_job_id": null,
     "submodule_sha": "0c4e6e4a8a0fb68aec6820eea8c7eed49d05a539",
     "torch": "2.13.0a0+8145d630e8.nv26.06",
-    "wall_clock_utc": "2026-08-13T14:28:11Z"
+    "wall_clock_utc": "2026-08-13T16:27:39Z"
   },
   "claims": {
     "E_ln_h": {
@@ -112,6 +112,15 @@
       "seed": "none",
       "sha256": "10aacd0f50a4d16f8c3b1fc66bd8c4ddac6e5e8ac12c75b144306f16e5bec9f4",
       "value": 1.6480594666745674e-11
+    },
+    "ed_vs_ff_worst_spread_abs": {
+      "array": "data/tfim_L8_N50k_seed1.pt",
+      "id": "ed_vs_ff_worst_spread_abs",
+      "kind": "value",
+      "script": "scripts/regen_stage0.py",
+      "seed": "none",
+      "sha256": "10aacd0f50a4d16f8c3b1fc66bd8c4ddac6e5e8ac12c75b144306f16e5bec9f4",
+      "value": 1.9984014443252818e-15
     },
     "hook_k6_vs_published_eval_s42": {
       "array": "data/ra03_states_L8_N800_s42.pt",

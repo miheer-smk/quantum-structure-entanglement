@@ -8,7 +8,7 @@ message: >-
 type: software
 authors:
   - family-names: Kulkarni
-    given-names: Miheer
+    given-names: Miheer Satish
     alias: miheer-smk
 repository-code: "https://github.com/miheer-smk/quantum-structure-entanglement"
 abstract: >-
@@ -16,7 +16,7 @@ abstract: >-
   entropy of the state represented internally by a transformer trained only to
   predict ground-state energies of the disordered transverse-field Ising model.
   Ground truth is computed two independent ways (exact diagonalization and a
-  free-fermion Majorana solver, agreeing to 1.6e-11) and hypotheses are
+  free-fermion Majorana solver, agreeing to 1.648e-11, spread 2.0e-15) and hypotheses are
   pre-registered with power analyses before any model measurement is taken.
   Companion arm to quantum-structure-sae, pinned as a submodule at an exact
   commit so the two arms share an identical data-generation pipeline.

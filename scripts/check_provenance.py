@@ -38,12 +38,15 @@ from qsent.pins import artifact_root, repo_root
 # as a tag. Documentation about the mechanism must not be mistaken for a use of it.
 TAG = re.compile(r"<!--\s*prov\s+(?P<body>id=\S+.*?)-->", re.DOTALL)
 LOOKAHEAD_LINES = 14         # how many NON-TAG lines below a tag its literal may appear in
-# PREREGISTRATION.md is gated too: it quotes published numbers, and a pre-registration
-# that misquotes its own prior is the stated-source defect in the document least able to
-# absorb it. README.md and AUTHOR_HANDOFF.md remain outstanding (author ruling, item 4).
-RESULTS_GLOBS = ("RESULTS_STAGE*.md", "PREREGISTRATION.md")
+# The public face is under the same gate as the results files. README.md and
+# AUTHOR_HANDOFF.md are the documents most readers will ever open, and until 2026-08-13
+# they were the only markdown outside this gate -- so the widest-audience files carried
+# the least-checked numbers, and the README had gone stale on six at once.
+RESULTS_GLOBS = ("RESULTS_STAGE*.md", "PREREGISTRATION.md",
+                 "README.md", "AUTHOR_HANDOFF.md")
 CLAIM_SOURCES = ("stage0_regenerated.json", "stage1_regenerated.json",
-                 "r1_reproduction.json", "preregistration_prior.json")
+                 "r1_reproduction.json", "preregistration_prior.json",
+                 "public_claims.json")
 
 
 def load_claims() -> dict[str, dict]:

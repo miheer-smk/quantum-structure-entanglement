@@ -1,0 +1,112 @@
+{
+  "_provenance": {
+    "artifact_sha256": {},
+    "base_image_digest": "nvcr.io/nvidia/pytorch@sha256:43c018d6a12963f1a1bad85ef8574b5c2a978eec2be0ebcacfb87f69e0d210e1",
+    "generated_outputs_dirty": false,
+    "hostname_class": "linux-aarch64-20core",
+    "numpy": "2.1.0",
+    "python": "3.12.3",
+    "repo_git_sha": "8ba87fc51e3d03e180c189c3c9dd2954ef760e61",
+    "repo_working_tree_dirty": true,
+    "rng_seeds": {},
+    "slurm_job_id": null,
+    "submodule_sha": "0c4e6e4a8a0fb68aec6820eea8c7eed49d05a539",
+    "torch": "2.13.0a0+8145d630e8.nv26.06",
+    "wall_clock_utc": "2026-08-13T16:27:37Z"
+  },
+  "claims": {
+    "phase06_lrzz_incr_r2_max": {
+      "array": "none",
+      "id": "phase06_lrzz_incr_r2_max",
+      "kind": "value",
+      "script": "scripts/public_claims.py",
+      "seed": "none",
+      "sha256": "none",
+      "value": 0.032
+    },
+    "phase06_lrzz_incr_r2_mean": {
+      "array": "none",
+      "id": "phase06_lrzz_incr_r2_mean",
+      "kind": "value",
+      "script": "scripts/public_claims.py",
+      "seed": "none",
+      "sha256": "none",
+      "value": 0.0283
+    },
+    "phase06_lrzz_incr_r2_min": {
+      "array": "none",
+      "id": "phase06_lrzz_incr_r2_min",
+      "kind": "value",
+      "script": "scripts/public_claims.py",
+      "seed": "none",
+      "sha256": "none",
+      "value": 0.0231
+    },
+    "phase06_lrzz_incr_r2_sd": {
+      "array": "none",
+      "id": "phase06_lrzz_incr_r2_sd",
+      "kind": "value",
+      "script": "scripts/public_claims.py",
+      "seed": "none",
+      "sha256": "none",
+      "value": 0.003
+    },
+    "ra08_learned_gain_L10": {
+      "array": "none",
+      "id": "ra08_learned_gain_L10",
+      "kind": "value",
+      "script": "scripts/public_claims.py",
+      "seed": "none",
+      "sha256": "none",
+      "value": 0.028
+    },
+    "ra08_learned_gain_L12": {
+      "array": "none",
+      "id": "ra08_learned_gain_L12",
+      "kind": "value",
+      "script": "scripts/public_claims.py",
+      "seed": "none",
+      "sha256": "none",
+      "value": 0.027
+    },
+    "ra08_learned_gain_L8": {
+      "array": "none",
+      "id": "ra08_learned_gain_L8",
+      "kind": "value",
+      "script": "scripts/public_claims.py",
+      "seed": "none",
+      "sha256": "none",
+      "value": 0.029
+    },
+    "ra09_learned_gain_L10": {
+      "array": "none",
+      "id": "ra09_learned_gain_L10",
+      "kind": "value",
+      "script": "scripts/public_claims.py",
+      "seed": "none",
+      "sha256": "none",
+      "value": -0.007
+    },
+    "ra09_learned_gain_L8": {
+      "array": "none",
+      "id": "ra09_learned_gain_L8",
+      "kind": "value",
+      "script": "scripts/public_claims.py",
+      "seed": "none",
+      "sha256": "none",
+      "value": -0.018
+    }
+  },
+  "published_constants": {
+    "phase06_lrzz_incr_r2_max": 0.032,
+    "phase06_lrzz_incr_r2_mean": 0.0283,
+    "phase06_lrzz_incr_r2_min": 0.0231,
+    "phase06_lrzz_incr_r2_sd": 0.003,
+    "ra08_learned_gain_L10": 0.028,
+    "ra08_learned_gain_L12": 0.027,
+    "ra08_learned_gain_L8": 0.029,
+    "ra09_learned_gain_L10": -0.007,
+    "ra09_learned_gain_L8": -0.018
+  },
+  "submodule_sha": "0c4e6e4a8a0fb68aec6820eea8c7eed49d05a539"
+}
