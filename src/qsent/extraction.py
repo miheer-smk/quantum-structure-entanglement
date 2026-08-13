@@ -32,8 +32,22 @@ shape (N, L, d_model):
     k=5  block 2, after attention add
     k=6  block 2, after MLP add            (== block 2 output == THE PUBLISHED HOOK)
 
-`k=6` is byte-for-byte the tensor `last_layer_pooled` hooks; `tests/test_extraction.py`
-asserts `pooled(k=6) == last_layer_pooled(...)` to machine precision.
+`tests/test_extraction.py` is the gate for all of this, and it exists as of 2026-08-13 --
+this docstring referenced it from Stage 0 onward while it did not, which is recorded in
+DEVIATIONS.md as the fourth instance of a stated source that was not an actual one. What it
+asserts, on the pinned `ms_trained/seed1` checkpoint and the arrays R1 consumes:
+
+  * `mean_pool(k=6)` agrees with `last_layer_pooled` to **< 2e-06** on all 800 realizations
+    of each of `data/ra03_states_L8_N800_s{42,43,44}.pt`. Asserted as a bound, not as digits:
+    the three values are exactly 14, 17 and 15 times 2^-24, so a quoted figure would report
+    which array was chosen. `k=6` is the published tensor.
+  * `_block_pieces` reproduces the block's ACTUAL forward output **bitwise, at every hook
+    point k=0..6** -- compared against tensors captured from a real `model(h)` pass, with the
+    intermediate writes taken from a pre-hook on `norm2`, which is what a Pre-LN block hands
+    its post-attention residual to.
+  * four failure demonstrations: `post_final_norm`, an off-by-one block index, an off-by-one
+    point within a block, and the wrong end of the stack are each REJECTED by those same
+    assertions.
 
 `post_final_norm` is available separately and is **deliberately excluded from the family**:
 it has passed through `final_norm`, so it is a different normalisation and mixing it into a
