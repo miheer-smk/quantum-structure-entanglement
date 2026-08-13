@@ -552,3 +552,70 @@ directions: the headline IS stable at 4 figures, it is NOT stable at 5 (so the r
 cannot quietly grow a digit), a noise-dominated quantity has fewer than 2 stable figures (so
 "bound" cannot become a blanket excuse), and a genuinely physical quantity is stable far beyond
 any quoted precision (the control).
+
+## 2026-08-13 — Resolved: the "41%" was a cross-environment delta, and it is evidence
+
+**Where the number came from.** A 41% figure was carried forward from the Stage 0 regeneration
+as though it were a thread-count spread. It is not, and it does not appear anywhere in
+`scripts/out/precision_audit.json`. It is the **committed-vs-regenerated** delta for the
+`uniform h = 1.0, L = 8` site-blind row from the original regeneration diff: committed
+`3.225e-14`, regenerated `4.546e-14`, i.e. +41.0%. The committed value is recoverable from
+history (`git show 209b6d2^:RESULTS_STAGE0.md`), so this resolution is derived, not recalled.
+
+**The part that matters, and the reason this is not just bookkeeping.** `3.225e-14` lies
+**outside** the range this quantity occupies across every BLAS thread configuration on the
+reconstructed environment:
+
+| Uniform row | committed (pre-2026-08-11) | thread-sweep range here (1/2/4/8) | verdict |
+|---|---|---|---|
+| `h = 0.5, L = 8` | `1.648e-11` | `1.647860e-11 … 1.648059e-11` | **inside** — agrees to 4 s.f. |
+| `h = 1.0, L = 8` | `3.225e-14` | `4.501954e-14 … 4.835021e-14` | **OUTSIDE**, 33% below the range |
+| `h = 2.0, L = 8` | `5.045e-13` | `4.882900e-13 … 4.899692e-13` | **OUTSIDE**, 3.0% above the range |
+
+**Thread count cannot explain either mismatch.** Both sit outside the interval that thread
+count can produce, in opposite directions, so the difference is a property of the *environment*
+and not of the parallelism. The original values came from the **unrecorded, pre-lockfile
+environment** — a different BLAS, LAPACK, numpy build or CPU architecture, none of which can be
+identified after the fact because none was recorded. That is the whole reason
+`env/requirements.lock` and the digest-pinned base image now exist.
+
+**Scientific impact: none.** Both values are three to four orders of magnitude inside the
+`< 1e-10` agreement gate, and both are quantities that section 1 shows detect nothing anyway
+(on a uniform field the site-blind solver performs the identical computation). The `h = 0.5`
+row — the largest of the three and the one that sets the headline — reproduces to all four of
+the significant figures it possesses.
+
+**Why it is recorded rather than dismissed.** The 2026-08-11 entry stated that the
+reconstruction "demonstrably is not the same by construction" and offered two *indirect*
+arguments: wall-clock (34 s vs 219 s) and an unknowable original `pytest` version. This is the
+first **direct, numerical** evidence that the two environments differ — a committed number that
+the reconstructed environment cannot produce under any thread configuration. It converts
+"presumably different" into "measurably different, by this much, on these quantities", and it
+is exactly what the acceptance test was built to surface.
+
+## 2026-08-13 — Author name: three spellings, and PLAN.md D5 misquotes LICENSE
+
+**Recorded now, corrected on the accuracy pass, per the author's instruction. `LICENSE` is not
+to be touched** (PLAN §5 D5).
+
+| Artifact | Name as written |
+|---|---|
+| `LICENSE` (authoritative) | `Copyright (c) 2026 **Miheer Satish Kulkarni**` |
+| `CITATION.cff` | `family-names: Kulkarni`, `given-names: Miheer` → "**Miheer Kulkarni**" |
+| git commit identity (D1) | `Miheer Kulkarni <222050236+miheer-smk@users.noreply.github.com>` |
+| `PLAN.md` §5 D5 | quotes LICENSE as `"Copyright (c) 2026 **Miheer Kulkarni**"` |
+
+Two distinct defects, not one:
+
+1. **A metadata mismatch on a public repository.** `CITATION.cff` is the machine-readable
+   record a citation manager reads, and it disagrees with the `LICENSE` copyright holder.
+2. **`PLAN.md` D5 misquotes the file it cites.** It presents a quotation of `LICENSE` that is
+   not what `LICENSE` says — and D5 was resolved on 2026-08-03 against a `LICENSE` that did not
+   exist in the tracked tree until `58d1b79` on 2026-08-05 (see the 2026-08-11 entry). The
+   quoted text was therefore written from expectation rather than from the file, which is the
+   stated-source error class in its mildest form: cosmetic here, and the same shape as the
+   three instances that were not.
+
+**Resolution directed by the author:** `LICENSE` stands unmodified and is authoritative;
+`CITATION.cff` and the `PLAN.md` D5 quotation are to be brought into exact agreement with it
+on the accuracy pass. Not done in this pass, deliberately, to keep the extraction gate first.
