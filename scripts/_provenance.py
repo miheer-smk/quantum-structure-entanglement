@@ -80,14 +80,49 @@ def _hostname_class() -> str:
     return f"{platform.system().lower()}-{platform.machine()}-{os.cpu_count()}core"
 
 
+def rng_fingerprint(gen: Any) -> dict[str, Any]:
+    """Identify a NumPy generator completely enough to tell two streams apart.
+
+    A seed is not an identity. `default_rng(0)` and `Generator(MT19937(0))` are both "seed 0"
+    and produce entirely different streams; so do the same seed under two NumPy versions if the
+    default bit generator ever changes. Stage 1's collapse quality `Q` and its bootstrap CIs
+    are resampling statistics, so a record that says only "seed 0" cannot distinguish a benign
+    stream difference from a real defect -- which is precisely the distinction a regeneration
+    diff exists to make.
+
+    So the fingerprint carries the bit generator's NAME and its full STATE. State is captured
+    at the moment of the call, which is why generators are fingerprinted at CONSTRUCTION, before
+    anything draws from them: a state recorded after use identifies where the stream ended, not
+    where it began, and only the latter lets anyone reproduce it.
+    """
+    bg = gen.bit_generator
+    state = bg.state
+    return {
+        "bit_generator": type(bg).__name__,
+        "state": json.loads(json.dumps(state, default=str)),   # numpy ints -> JSON-safe
+        "seed_seq_entropy": getattr(getattr(bg, "seed_seq", None), "entropy", None),
+    }
+
+
 def provenance(seeds: dict[str, int] | None = None,
-               artifacts: list[str] | None = None) -> dict[str, Any]:
-    """Build the provenance block. `artifacts` are paths relative to $QSAE_ARTIFACTS."""
+               artifacts: list[str] | None = None,
+               rngs: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Build the provenance block. `artifacts` are paths relative to $QSAE_ARTIFACTS.
+
+    `rngs` maps a label to either a `numpy.random.Generator` (fingerprinted here) or an
+    already-captured fingerprint dict from `rng_fingerprint`. Pass generators BEFORE drawing
+    from them, or pass fingerprints captured at construction.
+    """
     hashes = {}
     for rel in sorted(artifacts or []):
         p = artifact_root() / rel
         hashes[rel] = sha256_file(p) if p.exists() else "MISSING"
     inputs_dirty, outputs_dirty = _git_dirty()
+    np_mod = __import__("numpy")
+    fingerprints = {
+        name: (obj if isinstance(obj, dict) else rng_fingerprint(obj))
+        for name, obj in (rngs or {}).items()
+    }
     return {
         "repo_git_sha": _git_sha(),
         "repo_working_tree_dirty": inputs_dirty,
@@ -95,6 +130,10 @@ def provenance(seeds: dict[str, int] | None = None,
         "submodule_sha": submodule_sha(),
         "artifact_sha256": hashes,
         "rng_seeds": seeds or {},
+        "rng_generators": fingerprints,
+        # What `default_rng()` resolves to in THIS environment. If NumPy ever changes its
+        # default, every "seed only" record silently starts meaning a different stream.
+        "numpy_default_bit_generator": type(np_mod.random.default_rng().bit_generator).__name__,
         "hostname_class": _hostname_class(),
         "python": sys.version.split()[0],
         "numpy": __import__("numpy").__version__,
