@@ -10,16 +10,17 @@
       "runs/ms_trained/seed1/best.pt": "f1dcf0903f264b0aa4eab4addd02a6a5b30040ea24825ec7e01a7a555161e83b"
     },
     "base_image_digest": "nvcr.io/nvidia/pytorch@sha256:43c018d6a12963f1a1bad85ef8574b5c2a978eec2be0ebcacfb87f69e0d210e1",
+    "generated_outputs_dirty": true,
     "hostname_class": "linux-aarch64-20core",
     "numpy": "2.1.0",
     "python": "3.12.3",
-    "repo_git_sha": "de203f0153532beb42556ceffee08bfa867fa378",
-    "repo_working_tree_dirty": true,
+    "repo_git_sha": "80d223098a230359cb0ebca909beaa2b5cb75d8c",
+    "repo_working_tree_dirty": false,
     "rng_seeds": {},
     "slurm_job_id": null,
     "submodule_sha": "0c4e6e4a8a0fb68aec6820eea8c7eed49d05a539",
     "torch": "2.13.0a0+8145d630e8.nv26.06",
-    "wall_clock_utc": "2026-08-13T14:09:27Z"
+    "wall_clock_utc": "2026-08-13T14:28:11Z"
   },
   "claims": {
     "E_ln_h": {

@@ -8,16 +8,17 @@
       "runs/ms_trained/seed1/best.pt": "f1dcf0903f264b0aa4eab4addd02a6a5b30040ea24825ec7e01a7a555161e83b"
     },
     "base_image_digest": "nvcr.io/nvidia/pytorch@sha256:43c018d6a12963f1a1bad85ef8574b5c2a978eec2be0ebcacfb87f69e0d210e1",
+    "generated_outputs_dirty": false,
     "hostname_class": "linux-aarch64-20core",
     "numpy": "2.1.0",
     "python": "3.12.3",
-    "repo_git_sha": "de203f0153532beb42556ceffee08bfa867fa378",
-    "repo_working_tree_dirty": true,
+    "repo_git_sha": "80d223098a230359cb0ebca909beaa2b5cb75d8c",
+    "repo_working_tree_dirty": false,
     "rng_seeds": {},
     "slurm_job_id": null,
     "submodule_sha": "0c4e6e4a8a0fb68aec6820eea8c7eed49d05a539",
     "torch": "2.13.0a0+8145d630e8.nv26.06",
-    "wall_clock_utc": "2026-08-13T14:02:32Z"
+    "wall_clock_utc": "2026-08-13T14:28:08Z"
   },
   "per_config": {
     "threads_1": {
@@ -336,6 +337,7 @@
     "hook_k6_vs_published_eval_s42": {
       "max": 8.344650268554688e-07,
       "min": 8.344650268554688e-07,
+      "other_axis_caveat": "bit-stable across threads, but varies ACROSS EVAL ARRAYS (14/17/15 x 2^-24); the array choice, not the thread count, is the binding axis. Reported as a bound.",
       "quotable": "8.3446502685546875e-07",
       "spread_abs": 0.0,
       "spread_rel": 0.0,
@@ -345,6 +347,7 @@
     "hook_k6_vs_published_eval_s43": {
       "max": 1.0132789611816406e-06,
       "min": 1.0132789611816406e-06,
+      "other_axis_caveat": "bit-stable across threads, but varies ACROSS EVAL ARRAYS (14/17/15 x 2^-24); the array choice, not the thread count, is the binding axis. Reported as a bound.",
       "quotable": "1.0132789611816406e-06",
       "spread_abs": 0.0,
       "spread_rel": 0.0,
@@ -354,6 +357,7 @@
     "hook_k6_vs_published_eval_s44": {
       "max": 8.940696716308594e-07,
       "min": 8.940696716308594e-07,
+      "other_axis_caveat": "bit-stable across threads, but varies ACROSS EVAL ARRAYS (14/17/15 x 2^-24); the array choice, not the thread count, is the binding axis. Reported as a bound.",
       "quotable": "8.9406967163085938e-07",
       "spread_abs": 0.0,
       "spread_rel": 0.0,
@@ -363,6 +367,7 @@
     "hook_postnorm_vs_published_eval_s42": {
       "max": 2.435093343257904,
       "min": 2.435093343257904,
+      "other_axis_caveat": "bit-stable across threads, but varies across eval arrays; reported as an interval in the results file.",
       "quotable": "2.4350933432579041e+00",
       "spread_abs": 0.0,
       "spread_rel": 0.0,
@@ -372,6 +377,7 @@
     "hook_postnorm_vs_published_eval_s43": {
       "max": 2.4007867872714996,
       "min": 2.4007867872714996,
+      "other_axis_caveat": "bit-stable across threads, but varies across eval arrays; reported as an interval in the results file.",
       "quotable": "2.4007867872714996e+00",
       "spread_abs": 0.0,
       "spread_rel": 0.0,
@@ -381,6 +387,7 @@
     "hook_postnorm_vs_published_eval_s44": {
       "max": 2.405803620815277,
       "min": 2.405803620815277,
+      "other_axis_caveat": "bit-stable across threads, but varies across eval arrays; reported as an interval in the results file.",
       "quotable": "2.4058036208152771e+00",
       "spread_abs": 0.0,
       "spread_rel": 0.0,
