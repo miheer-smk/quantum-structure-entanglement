@@ -447,3 +447,34 @@ assertion that the versions are right. That regeneration, its committed scripts 
 **First run of the reconstructed environment: 57 passed.** The submodule pin asserts, and all
 35 pinned artifact hashes verify. This establishes only that the suite is green here; it says
 nothing yet about whether the *numbers* match, which is what the acceptance test measures.
+
+## 2026-08-13 — `scripts/diff_stage0.py` deleted, superseded by the provenance gate
+
+**It was committed and non-functional.** The tool parsed the committed values out of
+`RESULTS_STAGE0.md` with free-text regexes — deliberately, so that no number was ever typed
+twice — and compared them against the regenerated ones. The 2026-08-11 corrections rewrote
+the §1 and §2 prose those regexes matched: `**8.94e-07**` became `< 2e-06`, and the header's
+`cross-validation cases: **1.648e-11**` became `**< 2e-11**`. The very first pattern then
+matched zero times and the tool aborted with
+`RuntimeError: expected exactly one match for worst, got 0`. It had been dead since the commit
+that corrected the results file, and nothing noticed, because nothing runs it.
+
+**The lesson, stated so it is not relearned:** *the value-checker was coupled to prose
+formatting.* Its correctness depended on the wording and punctuation of a Markdown sentence,
+so an honest edit to that sentence — one that made the results file *more* accurate — silently
+broke the checker meant to police it. Any harness that recovers structured facts by pattern-
+matching unstructured prose has this failure mode, and it fails in the dangerous direction:
+a regex that stops matching raises, but a regex that matches the *wrong* number does not, which
+is exactly instance two of the stated-source error class (`0.560` read as `0.0283`).
+
+**Superseded by `scripts/check_provenance.py`**, which does the same job through the structured
+`<!--prov …-->` tags: the tag carries `md=<the literal as written>`, the gate asserts that
+literal appears in the markdown beneath it, and compares it to the independently registered
+claim at the literal's own significant figures. Prose may be rewritten freely; only the tagged
+literal is load-bearing, and a stale literal is a gate failure rather than a silent pass. The
+tag also carries the array, seed and artifact hash, so it checks provenance as well as value —
+strictly more than the deleted tool did.
+
+Nothing is lost by the deletion: every quantity `diff_stage0.py` compared is now a registered
+claim with a tag, and the gate runs in the suite (`tests/test_provenance_gate.py`) rather than
+by hand.
