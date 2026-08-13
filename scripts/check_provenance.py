@@ -39,7 +39,7 @@ from qsent.pins import artifact_root, repo_root
 TAG = re.compile(r"<!--\s*prov\s+(?P<body>id=\S+.*?)-->", re.DOTALL)
 LOOKAHEAD_LINES = 14         # how many NON-TAG lines below a tag its literal may appear in
 RESULTS_GLOB = "RESULTS_STAGE*.md"
-CLAIM_SOURCES = ("stage0_regenerated.json", "stage1_regenerated.json")
+CLAIM_SOURCES = ("stage0_regenerated.json", "stage1_regenerated.json", "r1_reproduction.json")
 
 
 def load_claims() -> dict[str, dict]:

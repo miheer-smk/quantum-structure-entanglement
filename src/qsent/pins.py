@@ -27,7 +27,7 @@ import numpy as np
 __all__ = [
     "artifact_root", "repo_root", "sha256_file", "verify_pin",
     "load_ensemble", "ensemble_meta", "load_checkpoint",
-    "published_constant", "submodule_sha",
+    "published_constant", "published_per_seed", "submodule_sha",
 ]
 
 
@@ -139,6 +139,61 @@ _PUBLISHED = {
         "Incremental R² beyond poly2-h",
         r"\|\s*long_range_zz\s*\|\s*0\.\d+±(0\.\d+)\s*\["),
 }
+
+
+# name -> (file, section heading, line anchor, per-entry pattern, expected count)
+#
+# The SAME trap as _PUBLISHED, one level down. The "Per-seed transparency" section carries
+# TWO per-seed lines: partial-r (s1:0.512, ...) and incremental R² (s1:0.023, ...). A pattern
+# matching `s(\d+):(0\.\d+)` without the line anchor returns the PARTIAL CORRELATION series --
+# the 0.560-for-0.0283 error reproduced exactly, in the numbers R1 is paired against. The
+# line anchor is therefore load-bearing, and tests/test_r1_gate.py demonstrates that removing
+# it returns the wrong series rather than raising.
+_PUBLISHED_SERIES = {
+    "phase06_lrzz_incr_r2_per_seed": (
+        "results/phase06_multiseed_trained.md",
+        "## Per-seed transparency",
+        r"\*\*incremental R²\*\* per-seed:\s*(.+)",
+        r"s(\d+):\s*(0\.\d+)",
+        10),
+}
+
+
+def _pinned_text(rel: str) -> str:
+    return (repo_root() / "submodules" / "quantum-structure-sae" / rel).read_text()
+
+
+def _section_of(text: str, heading: str, rel: str) -> str:
+    if heading not in text:
+        raise RuntimeError(f"section {heading!r} not found in pinned {rel}")
+    return text.split(heading, 1)[1].split("\n## ", 1)[0]
+
+
+def published_per_seed(name: str) -> dict[int, float]:
+    """Read a published PER-SEED series out of the pinned submodule. Nothing is typed.
+
+    Raises unless the line anchor matches exactly once and yields exactly the expected number
+    of entries with distinct seed ids. R1 pairs on seed identity, so a series that silently
+    came from the wrong line, or lost an entry, would corrupt the pairing rather than fail.
+    """
+    rel, heading, line_pat, entry_pat, expected = _PUBLISHED_SERIES[name]
+    section = _section_of(_pinned_text(rel), heading, rel)
+
+    lines = re.findall(line_pat, section)
+    if len(lines) != 1:
+        raise RuntimeError(
+            f"expected exactly one line matching {line_pat!r} under {heading!r} in {rel}, "
+            f"got {len(lines)}")
+
+    entries = re.findall(entry_pat, lines[0])
+    if len(entries) != expected:
+        raise RuntimeError(
+            f"expected {expected} per-seed entries for {name}, got {len(entries)}: {entries}")
+
+    out = {int(s): float(v) for s, v in entries}
+    if len(out) != expected:
+        raise RuntimeError(f"duplicate seed ids in {name}: {entries}")
+    return out
 
 
 def published_constant(name: str) -> float:
