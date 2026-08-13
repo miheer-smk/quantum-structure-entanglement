@@ -653,3 +653,67 @@ point rather than only `k=6`, and four failure demonstrations.
 repo-relative path named in a docstring or comment resolves — shipped with a failure
 demonstration — is outstanding. Until it exists, this instance is patched, not gated, and the
 class remains alive for paths nobody has happened to check.
+
+## 2026-08-13 — Stage 1 regenerated: one precision defect corrected, three populations found unreproducible
+
+**The exercise that found three defects in Stage 0 was run on Stage 1, which had never had it.**
+`scripts/regen_stage1.py` regenerates every Stage 1 quantity the repository contains enough
+information to recompute. Two findings, of unequal weight.
+
+### (1) `|dSSR| = 0.00e+00` — corrected to a bound
+
+`RESULTS_STAGE1.md` §3 reported the mirrored-vs-forward difference in the Calabrese–Cardy fit
+residual as **exactly zero**. It regenerates as `5.551115e-17`, and across BLAS thread counts
+here the quantity occupies `[5.551115e-17, 1.665335e-16]` — **it is never zero in any
+configuration on this machine**. The committed value lies outside the achievable range: the
+same signature as the two Stage 0 site-blind rows, and the **third instance** of a committed
+number that this environment cannot produce, attributable to the unrecorded pre-lockfile
+environment.
+
+It is also a precision overstatement independent of the environment: `stable_sigfigs = 0`, so
+under the corrected rule (author, 2026-08-13) the quantity cannot be quoted as a value at all.
+`0.00e+00` asserts an *exact equality* that a least-squares residual computed two ways does not
+have. Restated as `|dSSR| < 1e-15`.
+
+**`|dc_eff| = 6.66e-16` restated the same way**, to `< 1e-14`. This one is **not** a mismatch —
+the committed value sits inside its achievable range `[2.22e-16, 1.33e-15]` — but it too has
+zero stable significant figures and was quoted to three.
+
+**The scientific claim is untouched.** §3 asserts that the `c_eff` fit is blind to mirroring,
+and that rests on the ratio between **0.569541 nats** of real asymmetry and a fit difference at
+the `1e-16` noise floor — about fifteen orders of magnitude. Quoting the noise floor to three
+significant figures added nothing to the argument and asserted precision that does not exist.
+
+### (2) Three populations cannot be regenerated at all — the larger finding
+
+| population | quantities | the exact missing fact |
+|---|---|---|
+| §9 collapse quality | `Q` = 0.0091 and 0.0376, both bootstrap CIs | bin edges, bin count, minimum occupancy per bin |
+| §8 / §10, L = 10 and 12 | 4 bias figures, 2 `c_eff` pairs, 2 gaps, 2 CIs | pool size drawn before filtering to `\|δ_r\| < 0.05` |
+| §2 site-ordering | 15 difference figures | which disordered chains were measured |
+
+**Deliberately not reconstructed, per the author's ruling of 2026-08-13.** Each missing fact is
+a **free parameter**. Searching parameter space for values that reproduce `0.0091` is fitting
+the answer, and — the decisive argument — *a recipe found that way would be indistinguishable
+from the original whether or not it was the original*, so it could never support the claim it
+appeared to verify. Marking them unreproducible is the stronger artifact: it is true, it is
+checkable, and it tells a reader exactly what would be needed.
+
+This is a **worse** defect class than Stage 0's, which was fully recomputable once the
+environment was rebuilt. Here the generating procedure itself was never recorded, and no
+environment work recovers it. It is recorded at full weight in `RESULTS_STAGE1.md` (in place,
+per population), in `README.md` (which quotes several of these numbers publicly, now marked),
+and in `AUTHOR_HANDOFF.md`.
+
+**Not a licence to delete.** These are real measurements and deleting them would be its own
+dishonesty; they stand, marked. Re-measuring them under a *documented* procedure would produce
+new numbers, honestly labelled as new — that is legitimate and is not reconstruction.
+
+### (3) Coverage wording corrected everywhere it appeared
+
+Reporting "N claims across M gated files" reads as coverage of those files, and it is not: the
+gate guarantees that every **registered claim** is tagged and correct, and is blind to any
+number nobody registered. `README.md` carried an explicit overstatement ("every numeric claim …
+carries a machine-checked provenance tag") which was false, and 43 measurement-shaped literals
+in that file alone carry no tag. `scripts/check_provenance.py` now prints the untagged literal
+count per file beside the claim count, so the distinction cannot be lost again.

@@ -200,3 +200,59 @@ def test_handoff_no_longer_claims_nothing_has_been_run(handoff):
     assert "does not validate anything about SAEs" in flat, (
         "R1's scope sentence must accompany its verdict in the handoff too")
     assert "nothing about entanglement" in flat
+
+
+# ---------------------------------------------------------------------------------------
+# Coverage claims must match what the gate actually guarantees
+# ---------------------------------------------------------------------------------------
+
+def test_readme_claim_count_matches_the_gate(readme):
+    """The README states a registered-claim count; it must be the gate's, not a memory of it.
+
+    This is the same staleness that left "57 tests" in a public file, applied to a number that
+    is easier to overstate: a claim count reads as coverage, so it must at least be current.
+    """
+    from check_provenance import load_claims
+    n = len(load_claims())
+    stated = [int(x) for x in re.findall(r"(\d+) of them", readme)]
+    assert stated, "README no longer states the registered-claim count"
+    assert stated == [n], f"README states {stated} registered claims, the gate has {n}"
+
+
+def test_readme_does_not_claim_universal_coverage(readme):
+    """The overstatement that was live in this file: 'every numeric claim ... carries a tag'.
+
+    The gate is blind to any number nobody registered, so a sentence implying full coverage is
+    false regardless of how many claims exist.
+    """
+    flat = _flat(readme)
+    assert "every numeric claim in the results files, the pre-registration, this README" \
+        not in flat, "the universal-coverage sentence is back"
+    assert "does not mean every number in these files is checked" in flat, (
+        "the README must say what the gate does NOT guarantee, not only what it does")
+
+
+def test_unreproducible_populations_are_marked_in_both_public_files(readme, handoff):
+    """Numbers that cannot be regenerated must say so where they are quoted."""
+    for phrase in ("NOT currently reproducible from committed code",):
+        assert phrase in readme, f"README does not mark the unreproducible populations"
+    for missing_fact in ("bin edges", "pool size"):
+        assert missing_fact in readme, f"README does not name the missing fact: {missing_fact}"
+    flat = _flat(handoff)
+    assert "cannot be regenerated" in flat, (
+        "AUTHOR_HANDOFF must state the stronger truth, not 'not yet tagged'")
+    assert "not yet under the provenance gate" not in flat, (
+        "the old, weaker wording is still present")
+
+
+def test_readme_untagged_count_matches_the_gate(readme):
+    """The README states how many literals the gate does NOT check; it must be measured.
+
+    Stating a coverage gap and then letting the figure drift would be a worse failure than not
+    stating one, so the number is asserted against the gate's own count rather than trusted.
+    """
+    from check_provenance import untagged_literals
+    n = len(untagged_literals(README))
+    stated = [int(x) for x in re.findall(r"(\d+) measurement-shaped literals", readme)]
+    assert stated, "README no longer states its untagged-literal count"
+    assert stated == [n], f"README states {stated} untagged literals, the gate counts {n}"

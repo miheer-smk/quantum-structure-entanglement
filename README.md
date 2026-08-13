@@ -46,8 +46,12 @@ reproduction gate that ties this arm's instrument to the published pipeline.
    > question this arm exists to answer — whether the represented state's entanglement behaves
    > as the physics predicts — is **open and untested**.
 
-151 tests passing; every numeric claim in the results files, the pre-registration, this README
-and `AUTHOR_HANDOFF.md` carries a machine-checked provenance tag.
+163 tests passing. **What the provenance gate guarantees, stated precisely:** every *registered
+claim* — 108 of them — is tagged and matches the script, input array, seed and artifact hash it
+names. It does **not** mean every number in these files is checked: a number nobody registered
+and nobody tagged is invisible to it, and by that measure 46 measurement-shaped literals in this
+README alone carry no tag (an upper bound — it counts tolerances and system sizes too). The
+specific unchecked measurements are marked where they appear, below.
 
 ---
 
@@ -164,16 +168,27 @@ separate them *in principle*. The disordered cases are the load-bearing ones.
 
 ### `c_eff` finite-size bias — measured, and it decides a hypothesis
 
-| | L = 8 | L = 10 | L = 12 |
+| | L = 8 | L = 10 ⚠ | L = 12 ⚠ |
 |---|---|---|---|
 | Clean critical chain (true `c = 0.5`) | +0.0881 | +0.0845 | +0.0809 |
-| Disordered, disorder-averaged (target `ln2/2 = 0.347`) | **+0.1953** | **+0.2091** | **+0.1763** |
-| Disordered, typical (median) | +0.2954 | +0.3013 | +0.2559 |
+| Disordered, disorder-averaged (target `ln2/2 = 0.347`) | **+0.1953** | **+0.2091** ⚠ | **+0.1763** ⚠ |
+| Disordered, typical (median) | +0.2954 | +0.3013 ⚠ | +0.2559 ⚠ |
+
+> ⚠ **The disordered L = 10 and L = 12 entries are NOT currently reproducible from committed
+> code.** They are real measurements, retained rather than deleted, but nobody can recompute
+> them from this repository: `PLAN.md` §A0b records the reference chains as
+> `default_rng(20260804 + L)` and the sub-ensemble as N = 2000, and **does not record the pool
+> size drawn before filtering to `|δ_r| < 0.05`** — which selects a different 2000 chains and
+> a different fit. Deliberately not reconstructed: the pool size is a free parameter, and
+> choosing one that reproduces `+0.2091` would be fitting the answer. See
+> `RESULTS_STAGE1.md` §8. The clean row and every L = 8 entry **do** regenerate and are
+> provenance-tagged.
 
 The disordered bias **exceeds the entire 0.153 gap** separating clean Ising (`c = 1/2`) from
 the infinite-randomness fixed point (`c̃ = ln2/2`). Even-odd oscillation terms remove none of
-it. Bootstrapped clean-vs-disordered gaps are **+0.046 / +0.029 / +0.058**, and **at L = 10 the
-95% CI spans zero**.
+it. Bootstrapped clean-vs-disordered gaps are **+0.046 / +0.029 ⚠ / +0.058 ⚠**, and **at L = 10
+the 95% CI spans zero**. (The L = 8 gap regenerates exactly, CI included; the L = 10 and L = 12
+gaps inherit the unreproducibility above.)
 
 **Pre-registered consequence:** at these system sizes `c_eff` **cannot distinguish the two
 universality classes**, and no such claim will be made from it. A bias-corrected estimator was
@@ -185,13 +200,23 @@ because the paired per-realization comparison uses no `c_eff` fit at all.
 
 Collapse quality `Q` (0 = perfect), 12,000 realizations per L, 400 bootstrap resamples:
 
-| collapse variable | Q | 95% CI |
+| collapse variable | Q ⚠ | 95% CI ⚠ |
 |---|---|---|
 | **ν = 2** (`δ·L^{1/2}`, pre-registered) | **0.0091** | [0.0095, 0.0152] |
 | ν = 1 (wrong exponent — control) | 0.0376 | [0.0413, 0.0710] |
 
+> ⚠ **This entire table is NOT currently reproducible from committed code.** The recipe in
+> `PLAN.md` §A0b fixes the *shape* of `Q` but not its *value*: the **bin edges, the bin count,
+> and any minimum occupancy per bin** are recorded nowhere, and each changes the number. With
+> three free parameters, a search that lands on `0.0091` would demonstrate only that a search
+> was run, so no reconstruction was attempted. The numbers are real measurements and are
+> retained; they are simply not checkable today. See `RESULTS_STAGE1.md` §9.
+
 Exact ground truth collapses, and the pre-registered exponent beats the control ~4× with
 non-overlapping CIs. The control matters: a small `Q` alone could just mean coarse binning.
+That *comparison* is more robust than either value: both are computed identically under
+whatever binning was used, so the ratio survives the missing parameters even though the
+digits do not.
 
 ### The extraction stack is commensurable with the published pipeline
 
@@ -247,7 +272,7 @@ cd quantum-structure-entanglement
 pip install -e . -e submodules/quantum-structure-sae
 
 cp .env.local.example .env.local     # then set QSAE_ARTIFACTS (outside both repos)
-OMP_NUM_THREADS=4 pytest -q          # 151 tests
+OMP_NUM_THREADS=4 pytest -q          # 163 tests
 ```
 
 > The suite does dense `eigvalsh` at L = 12 (4096×4096). Leave BLAS threads bounded and do
@@ -265,7 +290,7 @@ src/qsent/
   disorder.py       delta_r criticality parameter and stratification
   splits.py         realization- and field-value-disjointness, asserted at runtime
   pins.py           hash-verified artifact loading; published constants read, not typed
-tests/              151 tests, incl. falsifiability checks (see below)
+tests/              163 tests, incl. falsifiability checks (see below)
 pins/               content hashes + the cross-repo contract
 scripts/            regeneration, precision audit, provenance gate, R1 runner
 env/                digest-pinned image + lockfile for the analysis environment
@@ -309,6 +334,10 @@ framings that are ruled out of all outputs.
 - **`c_eff` cannot identify a universality class at L ≤ 12** (measured above). Reported descriptively only.
 - **Depth is 3 blocks.** H3/H4 are exploratory by construction. At n = 7 hook points a Spearman test needs `ρ ≥ 0.786` for p < 0.05; at n = 3 or 4, significance is unreachable at any `ρ`. A null H4 at this n is **uninformative, not evidence of dissociation**.
 - **Only L = 8 has a pinned ensemble**, and no L = 10/12 checkpoints survive upstream. A claim-bearing cross-L result needs new pinned ensembles *and* new training.
+- **Three Stage 1 populations cannot be regenerated at all** — the collapse-quality table, the
+  L = 10/12 disordered `c_eff` rows, and the §2 site-ordering diffs. Their generating recipes
+  were never recorded. Marked in place above and in `RESULTS_STAGE1.md`; not reconstructed,
+  because the missing parameters are free and fitting them would be fitting the answer.
 - **Two upstream published numbers have no recoverable artifacts** — their checkpoints were never saved. See `AUTHOR_HANDOFF.md`.
 
 ---

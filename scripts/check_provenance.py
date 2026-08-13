@@ -1,5 +1,19 @@
 """
-Provenance gate: every numeric claim in RESULTS_*.md must name the source it actually has.
+Provenance gate: every REGISTERED claim must be tagged, and every tag must name the source it
+actually has.
+
+WHAT THIS GUARANTEE IS, AND WHAT IT IS NOT
+------------------------------------------
+It is: *every claim a generating script registered appears in a gated file, and every tag in a
+gated file agrees with the claim it names.* It is NOT: "every number in a gated file has been
+checked." A number nobody registered and nobody tagged is INVISIBLE to this gate. Saying "N
+claims across M files" reads as coverage of those files and is not -- README.md carried 18
+untagged numbers while the gate reported PASS over it.
+
+So the summary line reports the untagged literal count beside the claim count, and
+`untagged_literals()` measures it. That count is an UPPER bound: it includes definitional
+constants (tolerances, system sizes, section numbers) that are not measurements and want no
+provenance. It exists to stop the claim count being read as a coverage figure.
 
 This is the structural retirement of the stated-source != actual-source error class, which
 has now occurred three times (see scripts/_claims.py and DEVIATIONS.md). Patching each
@@ -84,6 +98,31 @@ def parse_tags(path: Path) -> list[dict]:
         fields["_below"] = "\n".join(window)
         tags.append(fields)
     return tags
+
+
+#: A numeric literal that looks like a MEASUREMENT: it has a decimal point or an exponent.
+#: Bare integers are excluded -- L = 8, 400 resamples, section numbers -- because counting them
+#: would drown the signal the count exists to give.
+LITERAL = re.compile(r"(?<![\w.])[-+]?\d*\.\d+(?:[eE][-+]?\d+)?|(?<![\w.])[-+]?\d+[eE][-+]?\d+")
+
+
+def untagged_literals(path: Path) -> list[str]:
+    """Measurement-shaped literals in `path` that no tag on the page accounts for.
+
+    Deliberately crude and deliberately reported rather than enforced: the point is to keep
+    the claim count from being mistaken for a coverage count, not to fail a build over a
+    tolerance written in prose.
+    """
+    text = path.read_text()
+    tagged = {t.get("md", "").lstrip("<>~\u2248") for t in parse_tags(path)}
+    body = TAG.sub(" ", text)                       # drop the tags themselves
+    out = []
+    for m in LITERAL.finditer(body):
+        lit = m.group(0)
+        if lit in tagged or lit.lstrip("+-") in {t.lstrip("+-") for t in tagged}:
+            continue
+        out.append(lit)
+    return out
 
 
 def _sig_figs(literal: str) -> int:
@@ -182,7 +221,16 @@ def main() -> int:
         for f in failures:
             print(f"  {f}")
         return 1
-    print(f"provenance gate PASSED -- {n} claims, every one tagged and matching its source")
+    files = sorted(q for g in RESULTS_GLOBS for q in repo_root().glob(g))
+    untagged = {p.name: len(untagged_literals(p)) for p in files}
+    total_untagged = sum(untagged.values())
+    print(f"provenance gate PASSED -- {n} registered claims, every one tagged and matching "
+          f"its source.")
+    print(f"  Coverage, stated so the claim count is not mistaken for one: {total_untagged} "
+          f"measurement-shaped literals across {len(files)} gated files carry NO tag and are "
+          f"NOT checked by this gate (upper bound; includes definitional constants).")
+    for name in sorted(untagged):
+        print(f"    {name:24s} {untagged[name]:4d} untagged")
     return 0
 
 

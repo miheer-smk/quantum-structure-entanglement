@@ -97,12 +97,41 @@ Stage 0's 46 numeric claims are now regenerated from pinned artifacts on demand 
 carries a machine-checked provenance tag naming the script, input array, seed and artifact
 hash that produced it.
 
-### Stage 1 — complete
+### Stage 1 — complete, and three of its number populations cannot be regenerated at all
 
 Toy-case validation, Construction-B pipeline validation, split disjointness, the estimator-bias
 harness, the measured `c_eff` finite-size bias, and the H1 collapse-feasibility result. See
-`RESULTS_STAGE1.md`. Its numbers are **not yet under the provenance gate** — Stage 1
-regeneration is outstanding and is the next scheduled piece of work.
+`RESULTS_STAGE1.md`.
+
+**This is the item co-authors most need to know, and it is worse than "not yet tagged".** The
+regeneration was run on 2026-08-13. Of Stage 1's numeric population:
+
+- **19 quantities regenerate** from pinned artifacts and are now provenance-tagged: all of §3,
+  the clean-chain `c_eff` at five system sizes, and every L = 8 row in §8 and §10. **18 of 19
+  matched on the first run.** The one that did not — `|dSSR| = 0.00e+00` — was corrected to a
+  bound; it lies outside the range that quantity occupies across any thread count here, the
+  third instance of the pre-lockfile-environment signature.
+- **Three populations cannot be regenerated, and the recipe to do so is recorded nowhere:**
+
+  | population | the exact missing fact |
+  |---|---|
+  | §9 collapse quality `Q` and its CIs | bin edges, bin count, minimum occupancy per bin |
+  | §8 and §10, L = 10 and L = 12 disordered rows | pool size drawn before the `\|δ_r\| < 0.05` filter |
+  | §2 site-ordering diffs | which disordered chains were measured |
+
+  **They were not reconstructed, on purpose.** Each missing parameter is free; searching for a
+  value that reproduces the published number would be fitting the answer, and a recipe found
+  that way is indistinguishable from the original whether or not it is the original. They are
+  marked unreproducible in place, in `RESULTS_STAGE1.md` and in `README.md`, which quotes some
+  of them publicly.
+
+**What this does and does not undermine.** Every affected number is a property of *exact
+physics or of an estimator* — no model is involved in any of them — and the pre-registered
+conclusions they support (the `c_eff` bias exceeds the gap it would have to resolve; the ν = 2
+collapse beats its control) rest on comparisons between quantities computed identically, which
+survive the missing parameters even where individual digits do not. Nothing in Stage 2 depends
+on the unreproducible digits. But the digits are in a public README and are not currently
+checkable, and that is stated rather than managed.
 
 ### Stage 1.5 — complete; R1 PASSED
 
@@ -142,7 +171,10 @@ this arm.
   at any `ρ`. A null H4 is uninformative, not evidence of dissociation.
 - K3: no L = 10 or L = 12 checkpoints survive; scaling claims need new training, and a
   claim-bearing cross-L H1 needs new *pinned ensembles* as well.
-- Stage 1's numbers are not yet regenerated or provenance-tagged.
+- Stage 1's three unreproducible populations: whether to re-measure them under a documented
+  procedure (new numbers, honestly labelled as such) or leave them marked. Re-measuring is
+  **not** reconstruction and would be legitimate; it is Stage-2-scale work and was not done
+  tonight.
 - `PREREGISTRATION.md` Part II (Stage 2 endpoint definitions) is pending and must be committed
   before Stage 2 runs.
 

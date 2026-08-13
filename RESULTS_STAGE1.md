@@ -1,8 +1,27 @@
 # RESULTS_STAGE1.md — Stage 1
 
 **Gate: PASS.** All toy cases within 1e-10; orientation gate green; splits asserted.
-**Tests: 57 passed** (219 s with `OMP_NUM_THREADS=4`). Submodule pin `0c4e6e4` asserted;
-all 35 pinned artifact hashes verified.
+**Tests: 57 passed at the time of writing** (219 s with `OMP_NUM_THREADS=4`) — the suite has
+grown substantially since; see `README.md` for the current count. Submodule pin `0c4e6e4`
+asserted; all 35 pinned artifact hashes verified.
+
+> ## Regeneration status (2026-08-13) — READ BEFORE QUOTING ANYTHING BELOW
+>
+> This file was written from code that no longer exists, in an environment since shown to
+> differ measurably from the current one (`DEVIATIONS.md`, 2026-08-13). `scripts/regen_stage1.py`
+> regenerates what the repository contains enough information to recompute. The population
+> splits in two, and the split is itself the finding:
+>
+> - **19 quantities regenerate and are now provenance-tagged** — §3 in full, the clean-chain
+>   `c_eff` at five system sizes, and every L = 8 row in §8 and §10, which use the **pinned**
+>   seed-1 ensemble. 18 of 19 matched on the first run; the one that did not is corrected in
+>   §3 and logged in `DEVIATIONS.md`.
+> - **Three populations CANNOT be regenerated at all**, because the recipe was never recorded:
+>   §2's site-ordering diffs, the L = 10/12 rows of §8 and §10, and all of §9. Each is marked
+>   in place below with the exact missing fact. **They have not been reconstructed**: the
+>   missing parameters are free, and searching for values that reproduce the published number
+>   would be fitting the answer — a recipe found that way is indistinguishable from the
+>   original whether or not it is the original.
 
 > Runbook note: the suite does dense `eigvalsh` at L = 12 (4096×4096). Unbounded BLAS threads
 > plus any concurrent run drives load average past 50 on a 20-core box and the suite appears
@@ -101,6 +120,14 @@ claims sites `[0, n_A)`. For a pure state `S(A) = S(complement of A)`, and the c
 `[0, n_A)` is `[n_A, L)`, which equals `[L−n_A, L)` **only when `n_A = L/2`** — i.e. only for
 even `L` at the half cut. Measured, on disordered chains:
 
+> **NOT REPRODUCIBLE FROM COMMITTED CODE (2026-08-13).** The numbers in this block are stated
+> as "measured, on disordered chains" and **the chains are not named** — not the ensemble, not
+> the seed, not the realization indices. Given a specific chain the computation is
+> deterministic and trivial, so the missing fact is small and total: *which `h` vectors were
+> used*. The block is retained because the measurements were real and the qualitative
+> conclusion (even-L half cuts agree to ~1e-15, odd L and asymmetric cuts do not) is
+> reproducible on any disordered chain; the specific digits are not checkable.
+
 ```
 EVEN L, half cut (every call site in the repo):
   L=4  diff 3.33e-16     L=6  diff 3.16e-15     L=8  diff 5.55e-15
@@ -155,16 +182,40 @@ zero imports**. This arm calls neither `qsae.observables._reduce_density_matrix`
 Calabrese–Cardy goes as `sin(pi*l/L)`, symmetric under `l -> L-l`. Measured on the
 max-asymmetry realization:
 
+> **CORRECTED 2026-08-13** (`DEVIATIONS.md`). This block previously reported
+> `|dSSR| = 0.00e+00` and `|dc_eff| = 6.66e-16`. Neither figure has the precision it was
+> quoted to: both have **zero stable significant figures** across BLAS thread counts, and
+> `0.00e+00` additionally asserts an *exact* equality the computation does not have. `|dSSR|`
+> regenerates as `5.55e-17` and occupies `[5.55e-17, 1.67e-16]` across thread counts here —
+> so the committed `0` lies **outside the achievable range**, the third instance of the
+> pre-lockfile-environment signature. Both are now stated as bounds.
+
+<!--prov id=s3_asym_c_eff script=scripts/regen_stage1.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=1.561767 -->
+<!--prov id=s3_asym_ssr script=scripts/regen_stage1.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.2894919 -->
+<!--prov id=s3_mirror_dc_eff script=scripts/regen_stage1.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=bound md=1e-14 -->
+<!--prov id=s3_mirror_dssr script=scripts/regen_stage1.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=bound md=1e-15 -->
+<!--prov id=s3_asym_margin script=scripts/regen_stage1.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.569541 -->
+
 ```
-profile          c_eff = 1.5617669761   SSR = 2.894919e-01
-MIRRORED profile c_eff = 1.5617669761   SSR = 2.894919e-01
-|dc_eff| = 6.66e-16    |dSSR| = 0.00e+00
+profile          c_eff = 1.561767   SSR = 0.2894919
+MIRRORED profile c_eff = 1.561767   SSR = 0.2894919
+|dc_eff| < 1e-14    |dSSR| < 1e-15        (both at the noise floor: 0 stable s.f.)
 true asymmetry present in the data: max|S(l)-S(L-l)| = 0.569541 nats
 ```
+
+The bounds are what the comparison needs and all it can support. The claim — that the `c_eff`
+fit is blind to mirroring — rests on the ratio between 0.569541 nats of real asymmetry and a
+fit difference at the `1e-16` noise floor, roughly **fifteen orders of magnitude**. Quoting
+that noise floor to three significant figures added nothing and asserted precision that does
+not exist.
 
 **Identical to machine precision, against 0.57 nats of real asymmetry.** The Stage 1 `c_eff`
 recovery check would have passed green on a fully mirrored profile. Frozen as
 `test_ceff_fit_is_blind_to_mirroring`.
+
+<!--prov id=s3_clean_c_eff_L32 script=scripts/regen_stage1.py array=none seed=none sha256=none kind=value md=0.5570 -->
+<!--prov id=s3_clean_c_eff_L64 script=scripts/regen_stage1.py array=none seed=none sha256=none kind=value md=0.5414 -->
+<!--prov id=s3_clean_c_eff_L128 script=scripts/regen_stage1.py array=none seed=none sha256=none kind=value md=0.5289 -->
 
 (Sanity, separately: the fit does recover the clean-critical value — `c_eff` = 0.5570,
 0.5414, 0.5289 at L = 32, 64, 128 on a clean critical open chain, converging to 0.5 from
@@ -174,6 +225,16 @@ above as finite-size corrections shrink.)
 
 Chosen by maximising `max |S(l) - S(L-l)|` over 4,000 sampled members of the pinned seed-1
 ensemble:
+
+<!--prov id=s3_asym_index script=scripts/regen_stage1.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=46009 -->
+<!--prov id=s3_asym_delta_r script=scripts/regen_stage1.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=+1.716380 -->
+<!--prov id=s3_asym_profile_cut1 script=scripts/regen_stage1.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.104188 -->
+<!--prov id=s3_asym_profile_cut2 script=scripts/regen_stage1.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.217091 -->
+<!--prov id=s3_asym_profile_cut3 script=scripts/regen_stage1.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.569087 -->
+<!--prov id=s3_asym_profile_cut4 script=scripts/regen_stage1.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.662536 -->
+<!--prov id=s3_asym_profile_cut5 script=scripts/regen_stage1.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.670177 -->
+<!--prov id=s3_asym_profile_cut6 script=scripts/regen_stage1.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.675944 -->
+<!--prov id=s3_asym_profile_cut7 script=scripts/regen_stage1.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.673729 -->
 
 | | |
 |---|---|
@@ -262,6 +323,38 @@ distribution. Characterised before anything relies on a corrected estimate.
 
 Full tables and the pre-registered decision are in `PLAN.md` §A0. Summary:
 
+<!--prov id=s8_clean_bias_L8 script=scripts/regen_stage1.py array=none seed=none sha256=none kind=value md=+0.0881 -->
+<!--prov id=s8_clean_bias_L10 script=scripts/regen_stage1.py array=none seed=none sha256=none kind=value md=+0.0845 -->
+<!--prov id=s8_clean_bias_L12 script=scripts/regen_stage1.py array=none seed=none sha256=none kind=value md=+0.0809 -->
+<!--prov id=s8_clean_c_eff_L8 script=scripts/regen_stage1.py array=none seed=none sha256=none kind=value md=0.5881 -->
+<!--prov id=s8_clean_c_eff_L10 script=scripts/regen_stage1.py array=none seed=none sha256=none kind=value md=0.5845 -->
+<!--prov id=s8_clean_c_eff_L12 script=scripts/regen_stage1.py array=none seed=none sha256=none kind=value md=0.5809 -->
+<!--prov id=s8_disordered_n_L8 script=scripts/regen_stage1.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=1877 -->
+<!--prov id=s8_disordered_bias_avg_L8 script=scripts/regen_stage1.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=+0.1953 -->
+<!--prov id=s8_disordered_bias_typ_L8 script=scripts/regen_stage1.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=+0.2954 -->
+<!--prov id=s8_disordered_c_eff_avg_L8 script=scripts/regen_stage1.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.5419 -->
+<!--prov id=s8_disordered_c_eff_typ_L8 script=scripts/regen_stage1.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.6420 -->
+
+**Regenerated and tagged (L = 8 only).** Clean-chain `c_eff` = **0.5881 / 0.5845 / 0.5809** at
+L = 8/10/12, i.e. bias **+0.0881 / +0.0845 / +0.0809** — deterministic, no ensemble involved,
+so all three regenerate. On the **pinned** seed-1 sub-ensemble (`|δ_r| < 0.05`, N = **1877**)
+the L = 8 fits are `c_eff` = **0.5419** disorder-averaged and **0.6420** typical, i.e. bias
+**+0.1953** and **+0.2954** against the `ln2/2` target.
+
+> **THE L = 10 AND L = 12 DISORDERED ROWS ARE NOT REPRODUCIBLE FROM COMMITTED CODE
+> (2026-08-13).** They read **+0.209 / +0.176** disorder-averaged and **+0.301 / +0.256**
+> typical. `PLAN.md` §A0b documents the reference chains as `default_rng(20260804 + L)` and
+> the sub-ensemble size as N = 2000, but **the pool size drawn before filtering to
+> `|δ_r| < 0.05` is recorded nowhere**, and N = 2000 does not determine it: a band that holds
+> ~3.7% of draws needs ~54,000 draws to yield 2000, but any pool ≥ that, with any truncation
+> rule, gives a different 2000 chains and a different fit. The missing fact is exactly: **how
+> many chains were drawn before the filter, and whether the first 2000 survivors were kept or
+> the pool was sized to produce exactly 2000.**
+>
+> Not reconstructed, deliberately. The pool size is a free parameter; choosing it to reproduce
+> `+0.209` would be fitting the answer, and a value found that way would be indistinguishable
+> from the original whether or not it was.
+
 - **Clean critical chain** (true `c = 0.5`): bias **+0.088 / +0.085 / +0.081** at L = 8/10/12.
 - **Disordered critical sub-ensemble** (target `ln2/2 = 0.347`): bias **+0.195 / +0.209 /
   +0.176** disorder-averaged, **+0.295 / +0.301 / +0.256** typical.
@@ -286,6 +379,25 @@ target. The bias above is a limitation of a secondary descriptive only.
 across-L residual spread after removing a per-L additive offset, over the consensus curve's
 dynamic range; 400 bootstrap resamples.
 
+> **NOT REPRODUCIBLE FROM COMMITTED CODE (2026-08-13). THE ENTIRE TABLE.** `PLAN.md` §A0b
+> gives the recipe — bin `δ_r` on a common grid, take the mean profile per L, remove a per-L
+> additive offset, divide the across-L residual spread by the consensus curve's dynamic range,
+> bootstrap 400 times — and that fixes the *shape* of `Q` without fixing its *value*. Three
+> parameters are missing and each changes the number: **the bin edges, the bin count, and any
+> minimum occupancy per bin.** The L = 10/12 pool-size gap above applies here too, since the
+> same reference chains are used.
+>
+> Not reconstructed, deliberately: with three free parameters, a search that lands on `0.0091`
+> demonstrates only that a search was run.
+>
+> **What survives without the digits.** The qualitative claim — the ν = 2 collapse is several
+> times tighter than the ν = 1 control, with non-overlapping CIs — is a comparison of two
+> quantities computed *identically* under whatever binning was used, so it is insensitive to
+> the missing parameters in a way the individual values are not. `PLAN.md` §A0b's conclusion
+> ("H1 stands") therefore does not rest on the unreproducible digits. This is stated as an
+> argument, not as a measurement; re-establishing it as a measurement requires a documented
+> binning and a rerun, which is Stage 2 work.
+
 | collapse variable | Q | bootstrap 95% CI |
 |---|---|---|
 | **ν = 2** (`δ·L^{1/2}`, pre-registered) | **0.0091** | **[0.0095, 0.0152]** |
@@ -302,11 +414,15 @@ too, since no L = 10/12 checkpoints exist. The fixed-L fallback needs neither.
 
 ## 10. Clean-vs-disordered `c_eff` gap, bootstrapped
 
-| L | clean | disordered | gap | 95% CI | spans 0? |
-|---|---|---|---|---|---|
-| 8 | 0.5881 | 0.5419 | +0.0463 | [+0.0103, +0.0817] | no |
-| 10 | 0.5845 | 0.5557 | +0.0288 | **[−0.0028, +0.0603]** | **YES** |
-| 12 | 0.5809 | 0.5229 | +0.0580 | [+0.0285, +0.0869] | no |
+<!--prov id=s10_clean_c_eff_L8 script=scripts/regen_stage1.py array=none seed=none sha256=none kind=value md=0.5881 -->
+<!--prov id=s10_disordered_c_eff_L8 script=scripts/regen_stage1.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=0.5419 -->
+<!--prov id=s10_gap_L8 script=scripts/regen_stage1.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=+0.0463 -->
+
+| L | clean | disordered | gap | 95% CI | spans 0? | regenerated? |
+|---|---|---|---|---|---|---|
+| 8 | 0.5881 | 0.5419 | +0.0463 | [+0.0103, +0.0817] | no | ✅ **yes**, pinned ensemble; CI reproduces to 4 d.p. |
+| 10 | 0.5845 | 0.5557 | +0.0288 | **[−0.0028, +0.0603]** | **YES** | ❌ **no** — pool size before the `\|δ_r\|` filter unrecorded (§8) |
+| 12 | 0.5809 | 0.5229 | +0.0580 | [+0.0285, +0.0869] | no | ❌ **no** — same missing fact |
 
 **At L = 10 the CI spans zero.** The three gaps are mutually consistent within CI, so the
 apparent non-monotonic ordering carries no signal. All are far below the asymptotic 0.15343.
