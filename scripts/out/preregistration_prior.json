@@ -1,0 +1,121 @@
+{
+  "_provenance": {
+    "artifact_sha256": {},
+    "base_image_digest": "nvcr.io/nvidia/pytorch@sha256:43c018d6a12963f1a1bad85ef8574b5c2a978eec2be0ebcacfb87f69e0d210e1",
+    "generated_outputs_dirty": false,
+    "hostname_class": "linux-aarch64-20core",
+    "numpy": "2.1.0",
+    "python": "3.12.3",
+    "repo_git_sha": "e82f0ae9e9eae7eac1a887a07d5f36bf1e0ca77b",
+    "repo_working_tree_dirty": true,
+    "rng_seeds": {},
+    "slurm_job_id": null,
+    "submodule_sha": "0c4e6e4a8a0fb68aec6820eea8c7eed49d05a539",
+    "torch": "2.13.0a0+8145d630e8.nv26.06",
+    "wall_clock_utc": "2026-08-13T15:36:20Z"
+  },
+  "claims": {
+    "phase06_entropy_incr_r2_random_mean": {
+      "array": "none",
+      "id": "phase06_entropy_incr_r2_random_mean",
+      "kind": "value",
+      "script": "scripts/build_preregistration.py",
+      "seed": "none",
+      "sha256": "none",
+      "value": 0.0185
+    },
+    "phase06_entropy_incr_r2_random_sd": {
+      "array": "none",
+      "id": "phase06_entropy_incr_r2_random_sd",
+      "kind": "value",
+      "script": "scripts/build_preregistration.py",
+      "seed": "none",
+      "sha256": "none",
+      "value": 0.0026
+    },
+    "phase06_entropy_incr_r2_sep_sd": {
+      "array": "none",
+      "id": "phase06_entropy_incr_r2_sep_sd",
+      "kind": "value",
+      "script": "scripts/build_preregistration.py",
+      "seed": "none",
+      "sha256": "none",
+      "value": 4.57
+    },
+    "phase06_entropy_incr_r2_trained_mean": {
+      "array": "none",
+      "id": "phase06_entropy_incr_r2_trained_mean",
+      "kind": "value",
+      "script": "scripts/build_preregistration.py",
+      "seed": "none",
+      "sha256": "none",
+      "value": 0.0305
+    },
+    "phase06_entropy_incr_r2_trained_sd": {
+      "array": "none",
+      "id": "phase06_entropy_incr_r2_trained_sd",
+      "kind": "value",
+      "script": "scripts/build_preregistration.py",
+      "seed": "none",
+      "sha256": "none",
+      "value": 0.0023
+    },
+    "phase06_entropy_partial_r_sep_sd": {
+      "array": "none",
+      "id": "phase06_entropy_partial_r_sep_sd",
+      "kind": "value",
+      "script": "scripts/build_preregistration.py",
+      "seed": "none",
+      "sha256": "none",
+      "value": 1.79
+    },
+    "phase06_entropy_partial_r_trained_mean": {
+      "array": "none",
+      "id": "phase06_entropy_partial_r_trained_mean",
+      "kind": "value",
+      "script": "scripts/build_preregistration.py",
+      "seed": "none",
+      "sha256": "none",
+      "value": 0.565
+    },
+    "phase06_entropy_partial_r_trained_sd": {
+      "array": "none",
+      "id": "phase06_entropy_partial_r_trained_sd",
+      "kind": "value",
+      "script": "scripts/build_preregistration.py",
+      "seed": "none",
+      "sha256": "none",
+      "value": 0.04
+    },
+    "phase06_lrzz_incr_r2_sep_sd": {
+      "array": "none",
+      "id": "phase06_lrzz_incr_r2_sep_sd",
+      "kind": "value",
+      "script": "scripts/build_preregistration.py",
+      "seed": "none",
+      "sha256": "none",
+      "value": 4.2
+    }
+  },
+  "published_prior": {
+    "phase06_entropy_incr_r2_random_mean": 0.0185,
+    "phase06_entropy_incr_r2_random_sd": 0.0026,
+    "phase06_entropy_incr_r2_sep_sd": 4.57,
+    "phase06_entropy_incr_r2_trained_mean": 0.0305,
+    "phase06_entropy_incr_r2_trained_sd": 0.0023,
+    "phase06_entropy_partial_r_sep_sd": 1.79,
+    "phase06_entropy_partial_r_trained_mean": 0.565,
+    "phase06_entropy_partial_r_trained_sd": 0.04,
+    "phase06_lrzz_incr_r2_sep_sd": 4.2
+  },
+  "source_plan_sections": {
+    "appendix": {
+      "end": "## 4. Design conflicts",
+      "start": "### A0 \u2014 `c_eff` finite-size bias"
+    },
+    "spine": {
+      "end": "## 3.6 Mandated",
+      "start": "## 3.55 PAPER SPINE"
+    }
+  }
+}

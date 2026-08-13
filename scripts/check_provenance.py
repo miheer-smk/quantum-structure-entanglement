@@ -38,8 +38,12 @@ from qsent.pins import artifact_root, repo_root
 # as a tag. Documentation about the mechanism must not be mistaken for a use of it.
 TAG = re.compile(r"<!--\s*prov\s+(?P<body>id=\S+.*?)-->", re.DOTALL)
 LOOKAHEAD_LINES = 14         # how many NON-TAG lines below a tag its literal may appear in
-RESULTS_GLOB = "RESULTS_STAGE*.md"
-CLAIM_SOURCES = ("stage0_regenerated.json", "stage1_regenerated.json", "r1_reproduction.json")
+# PREREGISTRATION.md is gated too: it quotes published numbers, and a pre-registration
+# that misquotes its own prior is the stated-source defect in the document least able to
+# absorb it. README.md and AUTHOR_HANDOFF.md remain outstanding (author ruling, item 4).
+RESULTS_GLOBS = ("RESULTS_STAGE*.md", "PREREGISTRATION.md")
+CLAIM_SOURCES = ("stage0_regenerated.json", "stage1_regenerated.json",
+                 "r1_reproduction.json", "preregistration_prior.json")
 
 
 def load_claims() -> dict[str, dict]:
@@ -97,7 +101,7 @@ def check(results_files: list[Path] | None = None,
     seen: set[str] = set()
 
     for path in (results_files if results_files is not None
-                 else sorted(repo_root().glob(RESULTS_GLOB))):
+                 else sorted(q for g in RESULTS_GLOBS for q in repo_root().glob(g))):
         for t in parse_tags(path):
             where = f"{t['_file']}:{t['_line']}"
             cid = t.get("id")

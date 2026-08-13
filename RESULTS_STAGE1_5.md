@@ -163,6 +163,28 @@ the mean lands `0.000038` from the published `0.0283`, roughly `1/80` of a publi
 Every one of the ten seeds moved in the same direction as its own noise rather than
 systematically: five differences positive, five negative.
 
+### The paired differences are below the resolution of the comparison
+
+**Read the Δ_s column as a bound, not as ten measured discrepancies.** The published series is
+stated to three decimals, so each published value carries a **±0.0005 rounding envelope** —
+`0.023` denotes anything in `[0.0225, 0.0235)`. The largest paired difference,
+`|Δ_s|max = 0.000389`, is **smaller than that envelope**. Every individual Δ_s is therefore
+indistinguishable from the rounding of the number it is subtracting: none of them is a
+measured disagreement between the two pipelines, and the signs and orderings within the column
+carry no information whatsoever.
+
+The correct statement is that **the substitution's effect is smaller than this comparison can
+resolve**. It is not that the effect was measured to be 3.89e-04; it is that it is below
+3.89e-04 *and* below the published data's own precision, so the comparison bottoms out before
+the substitution does. Recovering the true per-seed differences would require the published
+values at full precision, which the pinned file does not carry.
+
+This **strengthens** the result and does not qualify the verdict. Limb (ii) asks whether
+`|Δ_s| ≤ 0.010`, and 10 of 10 seeds clear it by a factor of 26 — a conclusion that holds
+across the entire rounding envelope, since even the worst-case reconstruction of the published
+values (`±0.0005` against `3.89e-04`) leaves every seed an order of magnitude inside the
+tolerance. Nothing about the verdict depends on the unresolvable part.
+
 ### What this does and does not license
 
 The substitution changes the representation by 14–17 float32 ULPs

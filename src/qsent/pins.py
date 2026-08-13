@@ -138,6 +138,38 @@ _PUBLISHED = {
         "results/phase06_multiseed_trained.md",
         "Incremental R² beyond poly2-h",
         r"\|\s*long_range_zz\s*\|\s*0\.\d+±(0\.\d+)\s*\["),
+
+    # --- the phase06 PRIOR for Stage 2's primary endpoint family ------------------------
+    # `entropy` appears as a row in BOTH the partial-correlation table and the
+    # incremental-R2 table, with different values. The section heading is the only thing
+    # separating them, which is the same anchor the 0.560/0.0283 error taught.
+    "phase06_entropy_incr_r2_trained_mean": (
+        "results/phase06_multiseed_trained.md", "Incremental R² beyond poly2-h",
+        r"\|\s*entropy\s*\|\s*(0\.\d+)±"),
+    "phase06_entropy_incr_r2_trained_sd": (
+        "results/phase06_multiseed_trained.md", "Incremental R² beyond poly2-h",
+        r"\|\s*entropy\s*\|\s*0\.\d+±(0\.\d+)\s*\["),
+    "phase06_entropy_incr_r2_random_mean": (
+        "results/phase06_multiseed_trained.md", "Incremental R² beyond poly2-h",
+        r"\|\s*entropy\s*\|[^|]*\|\s*(0\.\d+)±"),
+    "phase06_entropy_incr_r2_random_sd": (
+        "results/phase06_multiseed_trained.md", "Incremental R² beyond poly2-h",
+        r"\|\s*entropy\s*\|[^|]*\|\s*0\.\d+±(0\.\d+)\s*\("),
+    "phase06_entropy_incr_r2_sep_sd": (
+        "results/phase06_multiseed_trained.md", "Incremental R² beyond poly2-h",
+        r"\|\s*entropy\s*\|[^|]*\|[^|]*\|\s*([+-]\d+\.\d+)\s*\|"),
+    "phase06_lrzz_incr_r2_sep_sd": (
+        "results/phase06_multiseed_trained.md", "Incremental R² beyond poly2-h",
+        r"\|\s*long_range_zz\s*\|[^|]*\|[^|]*\|\s*([+-]\d+\.\d+)\s*\|"),
+    "phase06_entropy_partial_r_trained_mean": (
+        "results/phase06_multiseed_trained.md", "Partial correlation | poly2-h",
+        r"\|\s*entropy\s*\|\s*(0\.\d+)±"),
+    "phase06_entropy_partial_r_trained_sd": (
+        "results/phase06_multiseed_trained.md", "Partial correlation | poly2-h",
+        r"\|\s*entropy\s*\|\s*0\.\d+±(0\.\d+)\s*\["),
+    "phase06_entropy_partial_r_sep_sd": (
+        "results/phase06_multiseed_trained.md", "Partial correlation | poly2-h",
+        r"\|\s*entropy\s*\|[^|]*\|[^|]*\|\s*([+-]\d+\.\d+)\s*\|"),
 }
 
 
