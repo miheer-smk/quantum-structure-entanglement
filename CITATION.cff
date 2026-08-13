@@ -34,6 +34,7 @@ keywords:
   - finite-size scaling
   - pre-registration
   - reproducibility
+license: MIT
 license-url: "https://github.com/miheer-smk/quantum-structure-entanglement#license"
 version: 0.1.0
 date-released: "2026-08-04"

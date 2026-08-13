@@ -1,9 +1,39 @@
 # quantum-structure-entanglement
 
-**Entanglement structure of energy-predicting transformers on the disordered transverse-field Ising chain.**
+### The question
 
-Status: **Stage 1.5 complete.** Apparatus, exact-physics reference measurements, and the
-reproduction gate that ties this arm's instrument to the published pipeline.
+> A transformer is trained only to predict the ground-state **energy** of a disordered
+> transverse-field Ising chain. Does the state it represents internally carry the right
+> **entanglement entropy** — the physics-native invariant — as a function of criticality?
+
+### Status in five seconds
+
+| | |
+|---|---|
+| **Asked** | does model-side entanglement track exact ground truth across the critical point |
+| **Established** | exact-physics ground truth (two independent solvers), a bitwise-verified extraction instrument, a passed reproduction gate against the published pipeline, and a frozen public pre-registration |
+| **Deliberately not done** | **the entanglement measurement itself.** Stage 2 has not run; H1–H5 are untested; `PREREGISTRATION.md` Part II is pending by design |
+
+**Stage 1.5 complete.** Everything in this repository is apparatus, exact physics, and
+instrument verification. Nothing here is a result about entanglement in a transformer.
+
+---
+
+## What is verifiable here
+
+Claims a reader can check beat claims a reader must trust. Each line names the artifact that
+settles it.
+
+<!--prov id=ed_vs_ff_worst script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=1.648e-11 -->
+<!--prov id=ed_vs_ff_worst_spread_abs script=scripts/regen_stage0.py array=data/tfim_L8_N50k_seed1.pt seed=none sha256=10aacd0f50a4 kind=value md=2.0e-15 -->
+
+| Claim | Check it |
+|---|---|
+| Ground truth is computed **two independent ways** and they agree to `1.648e-11` (spread `2.0e-15`) against a `< 1e-10` gate | `OMP_NUM_THREADS=4 pytest -q` — `tests/test_exact_entropy.py` |
+| The extraction instrument reproduces the model's real forward pass **bitwise at all 7 hook points**, and **rejects 4 deliberately wrong hooks** | `tests/test_extraction.py` (the rejections print their own failure messages) |
+| **R1 passed**, and its tolerance was fixed **before the number existed** | `git show 5f58a7b:RESULTS_STAGE1_5.md` — that tree holds the pre-commitment and **zero** occurrences of a verdict; `git show 5f58a7b --stat` shows no results artifact |
+| The pre-registration is **byte-identical** to the text frozen in `PLAN.md` on 2026-08-04 | `tests/test_preregistration.py` — asserts the lift character-for-character and that a single softened word is caught |
+| Every registered numeric claim names the script, array, seed and artifact hash it came from | `env/run.sh python scripts/check_provenance.py` |
 
 ---
 
@@ -46,12 +76,20 @@ reproduction gate that ties this arm's instrument to the published pipeline.
    > question this arm exists to answer — whether the represented state's entanglement behaves
    > as the physics predicts — is **open and untested**.
 
-163 tests passing. **What the provenance gate guarantees, stated precisely:** every *registered
-claim* — 108 of them — is tagged and matches the script, input array, seed and artifact hash it
-names. It does **not** mean every number in these files is checked: a number nobody registered
-and nobody tagged is invisible to it, and by that measure 46 measurement-shaped literals in this
-README alone carry no tag (an upper bound — it counts tolerances and system sizes too). The
-specific unchecked measurements are marked where they appear, below.
+198 tests passing.
+
+**What the provenance gate guarantees, stated precisely:** every *registered claim* — 108 of
+them — is tagged and matches the script, input array, seed and artifact hash it came from. That
+is the meaningful guarantee, and it is the one worth reading.
+
+It does **not** mean every number in every file is checked: a number nobody registered and
+nobody tagged is invisible to the gate. The gate reports that gap rather than hiding it — 50
+measurement-shaped literals in this README, 430 across all six gated files. **That figure is a
+deliberately crude upper bound and should not be read as a coverage ratio:** it is dominated by
+definitional constants (`1e-10` tolerances, `L = 8`, `U(0.1, 2.0)`), section and version
+numbers, and figures quoted in prose from the pinned predecessor work — none of which are
+measurements this repository produced or wants provenance for. The measurements that genuinely
+are unchecked are marked individually where they appear, below.
 
 ---
 
@@ -214,9 +252,8 @@ Collapse quality `Q` (0 = perfect), 12,000 realizations per L, 400 bootstrap res
 
 Exact ground truth collapses, and the pre-registered exponent beats the control ~4× with
 non-overlapping CIs. The control matters: a small `Q` alone could just mean coarse binning.
-That *comparison* is more robust than either value: both are computed identically under
-whatever binning was used, so the ratio survives the missing parameters even though the
-digits do not.
+That *comparison* is more robust than either value **if both sides used the same binning** —
+the natural reading, but undocumented, so assumed rather than known (`RESULTS_STAGE1.md` §9).
 
 ### The extraction stack is commensurable with the published pipeline
 
@@ -272,13 +309,23 @@ cd quantum-structure-entanglement
 pip install -e . -e submodules/quantum-structure-sae
 
 cp .env.local.example .env.local     # then set QSAE_ARTIFACTS (outside both repos)
-OMP_NUM_THREADS=4 pytest -q          # 163 tests
+OMP_NUM_THREADS=4 pytest -q          # 198 tests
 ```
 
 > The suite does dense `eigvalsh` at L = 12 (4096×4096). Leave BLAS threads bounded and do
 > not run it concurrently with itself, or it will appear to hang.
 
 ---
+
+## Where to start reading
+
+**`CLAUDE.md`** carries the methodological rules this repository is built on — chiefly that a
+check is not a gate until it has been demonstrated capable of failing on the error it targets.
+**`PLAN.md`** is the staged design and the source of the frozen pre-registration text;
+**`PREREGISTRATION.md`** is what was committed in advance of any measurement, byte-verified
+against it. **`DEVIATIONS.md`** records every departure from the plan, dated and with reasons,
+including the errors this project made and how they were caught — read it if you want to know
+what went wrong rather than what went right.
 
 ## Repository layout
 
@@ -290,7 +337,7 @@ src/qsent/
   disorder.py       delta_r criticality parameter and stratification
   splits.py         realization- and field-value-disjointness, asserted at runtime
   pins.py           hash-verified artifact loading; published constants read, not typed
-tests/              163 tests, incl. falsifiability checks (see below)
+tests/              198 tests, incl. falsifiability checks (see below)
 pins/               content hashes + the cross-repo contract
 scripts/            regeneration, precision audit, provenance gate, R1 runner
 env/                digest-pinned image + lockfile for the analysis environment

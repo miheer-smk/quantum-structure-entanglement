@@ -390,10 +390,13 @@ dynamic range; 400 bootstrap resamples.
 > Not reconstructed, deliberately: with three free parameters, a search that lands on `0.0091`
 > demonstrates only that a search was run.
 >
-> **What survives without the digits.** The qualitative claim — the ν = 2 collapse is several
-> times tighter than the ν = 1 control, with non-overlapping CIs — is a comparison of two
-> quantities computed *identically* under whatever binning was used, so it is insensitive to
-> the missing parameters in a way the individual values are not. `PLAN.md` §A0b's conclusion
+> **What survives without the digits — CONDITIONAL, and the condition is not verifiable.** The
+> qualitative claim — the ν = 2 collapse is several times tighter than the ν = 1 control, with
+> non-overlapping CIs — is a comparison of two quantities that were *presumably* computed under
+> the same binning, which would make it insensitive to the missing parameters in a way the
+> individual values are not. **That both sides used the same binning is undocumented, and is
+> therefore assumed rather than known.** It is the natural reading of a table that reports them
+> side by side as a control comparison, and it is not a fact this repository can check. `PLAN.md` §A0b's conclusion
 > ("H1 stands") therefore does not rest on the unreproducible digits. This is stated as an
 > argument, not as a measurement; re-establishing it as a measurement requires a documented
 > binning and a rerun, which is Stage 2 work.

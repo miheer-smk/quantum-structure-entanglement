@@ -49,6 +49,18 @@ def _flat(text: str) -> str:
     return re.sub(r"\s+", " ", text.replace("\n> ", " ").replace("**", ""))
 
 
+@pytest.fixture(scope="module")
+def flat(readme) -> str:
+    """README with markdown wrapping flattened.
+
+    Phrase and count assertions must survive rewrapping: a sentence hard-wrapped at 96
+    characters splits "108 of them" across a newline, and an assertion against raw text then
+    fails for a formatting reason rather than a factual one. Same coupling that killed
+    scripts/diff_stage0.py.
+    """
+    return _flat(readme)
+
+
 # ---------------------------------------------------------------------------------------
 # The test count, against a real collection
 # ---------------------------------------------------------------------------------------
@@ -206,7 +218,7 @@ def test_handoff_no_longer_claims_nothing_has_been_run(handoff):
 # Coverage claims must match what the gate actually guarantees
 # ---------------------------------------------------------------------------------------
 
-def test_readme_claim_count_matches_the_gate(readme):
+def test_readme_claim_count_matches_the_gate(readme, flat):
     """The README states a registered-claim count; it must be the gate's, not a memory of it.
 
     This is the same staleness that left "57 tests" in a public file, applied to a number that
@@ -214,7 +226,7 @@ def test_readme_claim_count_matches_the_gate(readme):
     """
     from check_provenance import load_claims
     n = len(load_claims())
-    stated = [int(x) for x in re.findall(r"(\d+) of them", readme)]
+    stated = [int(x) for x in re.findall(r"(\d+) of them", flat)]
     assert stated, "README no longer states the registered-claim count"
     assert stated == [n], f"README states {stated} registered claims, the gate has {n}"
 
@@ -228,7 +240,7 @@ def test_readme_does_not_claim_universal_coverage(readme):
     flat = _flat(readme)
     assert "every numeric claim in the results files, the pre-registration, this README" \
         not in flat, "the universal-coverage sentence is back"
-    assert "does not mean every number in these files is checked" in flat, (
+    assert "does not mean every number in every file is checked" in flat, (
         "the README must say what the gate does NOT guarantee, not only what it does")
 
 
@@ -245,7 +257,7 @@ def test_unreproducible_populations_are_marked_in_both_public_files(readme, hand
         "the old, weaker wording is still present")
 
 
-def test_readme_untagged_count_matches_the_gate(readme):
+def test_readme_untagged_count_matches_the_gate(readme, flat):
     """The README states how many literals the gate does NOT check; it must be measured.
 
     Stating a coverage gap and then letting the figure drift would be a worse failure than not
@@ -253,6 +265,22 @@ def test_readme_untagged_count_matches_the_gate(readme):
     """
     from check_provenance import untagged_literals
     n = len(untagged_literals(README))
-    stated = [int(x) for x in re.findall(r"(\d+) measurement-shaped literals", readme)]
+    stated = [int(x) for x in re.findall(r"(\d+) measurement-shaped literals", flat)]
     assert stated, "README no longer states its untagged-literal count"
     assert stated == [n], f"README states {stated} untagged literals, the gate counts {n}"
+
+
+def test_citation_cff_is_complete_and_licensed():
+    """CFF 1.2.0 required and recommended fields, and a license matching LICENSE.
+
+    `license` was absent while `license-url` pointed at the README's license anchor -- the
+    machine-readable field a citation manager reads was the one field that did not say MIT.
+    """
+    import yaml
+    d = yaml.safe_load(CITATION.read_text())
+    for field in ("cff-version", "message", "title", "authors", "abstract",
+                  "repository-code", "keywords", "license", "type", "version",
+                  "date-released"):
+        assert d.get(field), f"CITATION.cff is missing {field!r}"
+    assert d["license"] == "MIT" and "MIT" in LICENSE.read_text()
+    assert len(d["keywords"]) >= 8
