@@ -619,3 +619,37 @@ Two distinct defects, not one:
 **Resolution directed by the author:** `LICENSE` stands unmodified and is authoritative;
 `CITATION.cff` and the `PLAN.md` D5 quotation are to be brought into exact agreement with it
 on the accuracy pass. Not done in this pass, deliberately, to keep the extraction gate first.
+
+## 2026-08-13 — Fourth instance: docstrings naming files that do not exist
+
+**Same class, fourth occurrence: a stated source that is not an actual source.** The prior
+three, all recorded above and in `CLAUDE.md`: fabricated `h` vectors labelled as pinned
+realizations; an unanchored regex returning `0.560` where `0.0283` was claimed; and
+`RESULTS_STAGE0.md` §2 attributing the hook-equality measurement to an array it was not
+measured on.
+
+**Fourth instance.** Two module docstrings asserted the existence of code that was not in the
+tree, in the present tense, for the whole of Stage 0 and Stage 1:
+
+| Docstring | Claimed | Reality until 2026-08-13 |
+|---|---|---|
+| `src/qsent/extraction.py` | "`tests/test_extraction.py` asserts `pooled(k=6) == last_layer_pooled(...)` to machine precision" | the file did not exist; nothing asserted it anywhere |
+| `src/qsent/free_fermions.py` | "See `convention.py`" (for the `2 × ln2` conversion) | `qsent/convention.py` did not exist |
+
+The shape is the one this repository keeps meeting: **a claim about provenance that no check
+compared against the thing it names.** A reader — or an author, months later — takes "asserted
+in tests/test_extraction.py" as evidence the assertion exists. It is weaker than the other
+three instances in consequence (no number was wrong) and identical in mechanism. It is
+recorded at the same weight deliberately: the three that mattered were each preceded by ones
+that did not, and the difference was luck, not kind.
+
+**Both are now true rather than deleted.** `qsent/convention.py` was written and its audit
+executed as a test (`tests/test_convention.py`, 2026-08-13); `tests/test_extraction.py` was
+written and now carries the extraction gate, and the `extraction.py` docstring was rewritten to
+describe what that file actually asserts — a bound rather than "machine precision", every hook
+point rather than only `k=6`, and four failure demonstrations.
+
+**Not yet retired structurally.** Per the author's ruling, a lint asserting that every
+repo-relative path named in a docstring or comment resolves — shipped with a failure
+demonstration — is outstanding. Until it exists, this instance is patched, not gated, and the
+class remains alive for paths nobody has happened to check.
